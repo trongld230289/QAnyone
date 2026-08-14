@@ -72,7 +72,7 @@ Rule: Task "done" chi khi DoD da met. KHONG tu doan locator â€” Codegen/Stu
 ### Quy trinh 4-tier cascade:
 
 **Buoc 1: Check POM_REGISTRY.md**
-- Page da co POM trong registry? â†’ Reuse (0 tokens). DONE.
+- Page da co POM trong registry? Reuse candidate. Verify qua MCP (Buoc 4 step 3a) truoc khi dung.
 - Thieu locator cho page? â†’ Continue.
 
 **Buoc 2: Check CODEGEN_CACHE.md**
@@ -490,6 +490,14 @@ describe('TC-XXXXX: [Title]', () => {
 - **Playwright:** `expect(locator).toBeVisible()` â€” auto-wait, KHONG dung `waitForTimeout`
 - **Cypress:** `.should('be.visible')` â€” auto-retry, KHONG dung `cy.wait(ms)` (tru API calls)
 
+### Video Visibility Rule (BAT BUOC):
+Playwright record video cho moi test. MOI test step PHAI nhin thay ro trong video:
+- **Sau moi action quan trong** (click menu, open dropdown, check checkbox, verify element): them `await page.waitForTimeout(2000)` de video capture duoc trang thai hien thi.
+- **Menu/dropdown/popup**: PHAI giu hien thi it nhat **3 giay** (`await page.waitForTimeout(3000)`) TRUOC KHI dong (Escape/click away) -- de video ghi lai duoc noi dung menu.
+- **KHONG duoc chay qua nhanh** -- neu 1 step chi mat <1s thi user xem video se khong thay gi ca.
+- Rule nay KHONG mau thuan voi "KHONG dung waitForTimeout cho assertions" -- day la waitForTimeout cho **video visibility**, KHONG phai cho test logic.
+- Toi thieu: 2s pause sau moi action co UI state change (menu open, dialog appear, checkbox toggle).
+
 ---
 
 <!-- STABLE:end -->
@@ -530,6 +538,63 @@ Full Flow xong khi:
 > MCP auth check (neu can) duoc xu ly BEN TRONG Buoc 4 (Locator Discovery), KHONG phai step rieng.
 > Auth cho test runner duoc tao tu dong boi global-setup dependency.
 
+**WHEN USER TYPES `NEW TC` - SHOW PROGRESS TABLE IMMEDIATELY (FIRST MESSAGE):**
+
+**Display method:** Use MARKDOWN TABLE for progress display. Re-render full table after each step completes with updated status. User prefers table format over code blocks for visual clarity. Sidebar todos are an acceptable trade-off.
+
+**Status icons:** ⬜ pending | 🔄 running | ✅ done | ⏭️ skipped
+
+**ADO TC Mode** (`NEW TC <number>`) - 8 rows:
+
+TC-<ID>: <title>
+
+| # | Step | Status |
+|---|------|--------|
+| 1 | Get Test Case Steps | 🔄 |
+| 2 | Analyze TC Steps | ⬜ |
+| 3 | Check POM_REGISTRY | ⬜ |
+| 4 | Locator Discovery | ⬜ |
+| 5 | Update/Create POM | ⬜ |
+| 6 | Generate Spec File | ⬜ |
+| 7 | Run Test + Auto-fix | ⬜ |
+| 8 | Open Report + Update files | ⬜ |
+
+**Manual TC Mode** (`NEW TC <text>`) - 10 rows:
+
+<tc-name>
+
+| # | Step | Status |
+|---|------|--------|
+| 1 | Get Test Case Steps | 🔄 |
+| 2 | Analyze TC Steps | ⬜ |
+| 3 | Check POM_REGISTRY | ⬜ |
+| 4 | Locator Discovery | ⬜ |
+| 5 | Update/Create POM | ⬜ |
+| 5.5 | User Review Steps | ⬜ |
+| 6 | Generate Spec File | ⬜ |
+| 7 | Run Test + Auto-fix | ⬜ |
+| 8 | Open Report + Update files | ⬜ |
+| 9 | Publish TC to ADO | ⬜ |
+
+**Final summary** (also table):
+
+| Item | Detail |
+|------|--------|
+| TC | TC-<ID> PASSED (<time>) |
+| Spec | <filename>.spec.ts |
+| Locators | <source> |
+| New POMs | <count or None> |
+
+Rules:
+- FIRST message = progress table. No other text before it.
+- When starting step: 🔄. Done: ✅. Skipped: ⏭️.
+- Re-render FULL table with updated statuses after each step.
+- After Step 8: show summary table ONLY. No extra text.
+
+**REPORT DISPLAY RULE:**
+- ONLY open/show HTML report when test PASSES.
+- If test FAILS -> do NOT open report. Just auto-fix and retry.
+- Report is shown ONLY after final PASS (or after all retries exhausted and user is notified).
 Detect tu dong dua tren `ado_configured`:
 - **ADO TC Mode**: `NEW TC <ID>` (so) â€” fetch tu ADO, KHONG hoi user
 - **Manual TC Mode**: `NEW TC <ten-tc>` (text) â€” mo codegen browser, user thao tac, paste code, agent gen spec
@@ -585,7 +650,7 @@ Voi moi step: xac dinh PAGE, ACTION, LOCATOR can thiet.
 ```
 Voi moi page can tuong tac:
 - Page da co POM? Locators du cho TC steps?
-  - Du: reuse â€” KHONG can MCP lai
+  - Du: reuse candidate (Buoc 4 se verify qua MCP truoc khi dung)
   - Thieu: can lay them locators (xem LOCATOR DISCOVERY)
   - Chua co: can tao POM moi
 ```
@@ -596,7 +661,8 @@ Voi moi page can tuong tac:
    - Playwright: user.json, cookies-for-mcp.json
    - Cypress (MSAL): msal-tokens-cache.json (cy.task se tu dong refresh neu expire)
 2. Inject auth vao MCP browser
-3. Check POM_REGISTRY.md first â€” neu POM da co locators cho page nay, REUSE (0 tokens)
+3. Check POM_REGISTRY.md first â€” neu POM da co locators cho page nay, REUSE candidate
+   3a. REUSE VERIFY: Dung MCP navigate den target page + get_visible_html. Verify key locators ton tai tren DOM. Neu KHONG tim thay, treat as "Thieu" va chay discovery. KHONG blind reuse.
 4. Check CODEGEN_CACHE.md â€” neu page path trong cache, READ tu cache (~200 tokens)
 5. Neu cache miss, run codegen (interactive mode). Xem LOCATOR DISCOVERY cho chi tiet.
 6. Cho elements codegen khong capture duoc, dung per-element MCP fallback
@@ -670,6 +736,62 @@ Voi moi page can tuong tac:
 - Neu page co MCP-fallback locators, ghi ro trong Notes column + Priority = Low
 - Buoc nay la synchronous â€” Buoc 6 can test case file da ton tai
 - **Ref Name UNIQUE per DOM element (bug fix):** Neu 2+ elements co accessible name/role giong nhau (VD: checkbox lap lai tren nhieu row cua 1 table/list, hoac "Select all" vs tung row checkbox deu ten "Select"), MOI element PHAI co Ref Name rieng (VD: `selectRow1Checkbox`, `selectRow2Checkbox` â€” KHONG dung chung 1 ten `checkbox` cho ca hai). Locator cua tung entry PHAI duoc scope theo row/parent container (VD: `page.getByRole('row', { name: 'Job A' }).getByRole('checkbox')`) de tranh strict-mode violation hoac Playwright/AI tu chon nham phan tu dau tien khi generate spec o Buoc 6.
+
+### Buoc 5.5: User Review Test Steps (TRUOC KHI GEN SPEC) — CHI MANUAL TC MODE
+
+> **CHI AP DUNG KHI:** Manual TC Mode (`NEW TC <ten-tc>`). ADO TC Mode (`NEW TC <ID>`) KHONG can review — steps da co san tu ADO, skip thang sang Buoc 6.
+
+> **MUC DICH:** Cho user review test steps TRUOC KHI gen code. Format steps PHAI giong ADO format (Step 1 = Pre-condition, Step 2+ = Action + Expected Result). Khi push len ADO se dung chinh format nay.
+
+**ADO TEST STEP FORMAT:**
+- Step 1: Pre-condition (Action = dieu kien tien quyet, Expected = trong hoac N/A)
+- Step 2+: Action = mo ta hanh dong user thuc hien, Expected = ket qua mong doi
+- KHONG co Flow grouping, KHONG co code/locator trong step text
+- Text don gian, mo ta hanh vi (giong nhu nguoi QA viet manual test case)
+
+**Flow:**
+
+1. SAU KHI test case file (.md) da tao xong (Buoc 5), show TOAN BO steps bang ask_questions:
+   header="Review Test Steps"
+   question="Neu dung het go 'OK'. Neu can sua: copy bang steps ben duoi, sua trong notepad, paste lai vao day."
+   message: (render FULL steps trong message de user co the COPY truc tiep)
+
+   `
+   | # | Action | Expected Result |
+   |---|--------|-----------------|
+   | 1 | Pre-condition: ... | |
+   | 2 | <action> | <expected> |
+   | ... | ... | ... |
+   `
+
+   options: KHONG co options (chi freeform input)
+   allowFreeformInput: true
+
+   -> User thay steps NGAY TRONG message, co the copy ra notepad de sua.
+
+2. IF user tra loi "OK" / "ok" / "confirm" / "done" -> proceed to Buoc 6.
+   IF user paste full steps da sua (bang markdown table hoac text):
+     -> AI doc full steps user paste (day la source of truth moi)
+     -> Update test case file (test-cases/*.md) voi steps moi
+     -> Update UI Elements Map neu action thay doi locator strategy
+     -> Show lai steps DA CAP NHAT de user confirm (loop cho den khi OK)
+
+3. Buoc 6 gen spec TU test case file da duoc user approve -> code dung ngay tu dau.
+
+**VD thuc te:**
+- AI sinh step: "| 9 | Click delete icon on first row | Delete confirmation appears |"
+- User thay sai, copy ra notepad sua thanh: "| 9 | Click delete icon on record with name 'test-data' | Delete confirmation appears |"
+- Paste lai vao chat
+- AI cap nhat test case file + locator strategy (dung getByRole('row', { name: 'test-data' }) thay vi .first())
+- User go "OK" -> Buoc 6 gen spec chinh xac
+
+**Luu y:**
+- KHONG dung options button (chon xong mat preview, user khong copy duoc)
+- Steps PHAI nam trong message de user COPY duoc
+- Format: ADO format (Step 1 = Pre-condition, Step 2+ = Action | Expected) — KHONG co Flow/Group
+- User paste FULL steps -> AI replace TOAN BO Test Steps section
+- Chap nhan ca markdown table va numbered list
+- Format nay CUNG la format dung khi push len ADO o Buoc 9
 
 ### Buoc 6: Generate Spec File from Test Case
 
@@ -912,18 +1034,21 @@ regression-test va smoke-test deu dependencies global-setup (tu dong login truoc
 
 Neu fail â†’ tu fix â†’ chay lai (toi da 3 vong). Chi bao user khi het kha nang.
 
-SAU KHI TEST PASS â†’ Mo HTML report (BAT BUOC):
-  BUOC 1: Kill bat ky process nao dang chiem port 9323 (tranh EADDRINUSE):
-    PowerShell: $p = Get-NetTCPConnection -LocalPort 9323 -ErrorAction SilentlyContinue | Select-Object -First 1; if ($p) { Stop-Process -Id $p.OwningProcess -Force -ErrorAction SilentlyContinue }
-  BUOC 2: Mo report (DUNG FULL PATH):
-    & "{project_root}\node_modules\.bin\playwright" show-report "{project_root}\playwright-report"
-    (chay async mode â€” browser mo report, KHONG cho terminal exit)
-  â†’ Bao cao NGAY khi thay "Serving HTML report at http://localhost:XXXX"
-  â†’ KHONG doi terminal ket thuc (server chay mai).
-  â†’ NEU van fail EADDRINUSE: them --port 9324
+SAU KHI TEST PASS -> Mo HTML report (BAT BUOC -- DUNG EDGE):
+  BUOC 1: Start report server:
+    Kill port 9323: Get-NetTCPConnection -LocalPort 9323 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+    Start server: npx playwright show-report (chay tu project root)
+    Doi thay "Serving HTML report at http://localhost:9323"
+    NEU EADDRINUSE: them --port 9324
+  BUOC 2: Mo report bang Edge (KHONG dung MCP Chromium):
+    Start-Process msedge "http://localhost:9323"
+    (Edge se tu mo report -- KHONG can screenshot)
 ```
-
 ### Buoc 8: Bao cao + Update files
+
+**BAO CAO FORMAT (BAT BUOC):**
+
+Phan 1 — Summary table:
 ```
 [GSD TC] TC-<ID>: [title]
 Steps: X | POMs updated: [list] | New locators: X
@@ -931,12 +1056,33 @@ Spec: tests/example-app-2025/regression-test/{ID}-{...}.spec.ts | Result: PASSED
 Files update: POM_REGISTRY.md + QANYONE_STATE.md (bat buoc) + PLAN.md (neu co task)
 ```
 
+Phan 2 — Test Steps Review (BAT BUOC — de user review va lam template cho TC sau):
+```
+## Test Steps Executed
+
+| # | ADO Step | Spec Implementation |
+|---|---------|---------------------|
+| 1 | [ADO step action text] | [Mo ta ngan code da chay: fixture calls, locators, assertions] |
+| 2 | ... | ... |
+| ... | ... | ... |
+```
+
+Rules cho Test Steps Review:
+- Liet ke MOI test.step() da chay trong spec
+- Cot "ADO Step" = action text goc tu ADO
+- Cot "Spec Implementation" = tom tat ngan: fixture/POM method calls, locator strategy, assertion type
+- Neu co van de ve performance (waitForTimeout qua nhieu, timeout cao bat thuong) — ghi chu rieng sau bang:
+  - Liet ke cac cho slow va ly do
+  - De xuat cai thien (VD: thay waitForTimeout bang expect().toBeVisible())
+- Format nay giup user review mapping ADO steps → code VA lam reference pattern cho cac TC tuong tu sau nay
+
 ### Buoc 9: Publish Test Case to ADO + Link User Story (CHI MANUAL TC MODE)
 ```
 CHI AP DUNG KHI: NEW TC <ten-tc> (Manual TC Mode)
 KHONG ap dung cho: NEW TC <ID> (ADO mode â€” TC da ton tai trong ADO roi)
 
 SAU KHI TEST PASS â€” thuc hien step nay BAT BUOC:
+
 
 1. ask_questions ask user to choose action:
    header="ADO Publish", question="Test PASSED. Do you want to create a new or update an existing test case on ADO?"
