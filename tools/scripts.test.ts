@@ -78,3 +78,37 @@ test("updateTestCase patches steps only", async () => {
   assert.equal(body.length, 1);
   assert.equal(body[0].path, "/fields/Microsoft.VSTS.TCM.Steps");
 });
+
+test("stepsFromTcFile parses Steps + Test Data and substitutes {{key}}", async () => {
+  const { writeFileSync, mkdtempSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { tmpdir } = await import("node:os");
+  const { stepsFromTcFile } = await import("../QAnyone/templates/scripts/ado-writer");
+  const dir = mkdtempSync(join(tmpdir(), "tc-"));
+  const file = join(dir, "TC-001-x.md");
+  writeFileSync(file, `---
+id: TC-001
+title: Search "jobs" | filter
+---
+## Steps
+| # | Action | Expected |
+|---|---|---|
+| 1 | [Pre] Logged in | |
+| 2 | Fill "{{kw}}" into "Search", press Enter | Table contains "{{kw}}" :: really |
+| 3 | Click "A \\| B" | |
+
+## Test Data
+| Key | Value | Note |
+|---|---|---|
+| kw | QA Engineer | |
+
+## Locators
+`);
+  const r = stepsFromTcFile(file);
+  assert.equal(r.title, 'Search "jobs" | filter');
+  assert.deepEqual(r.steps, [
+    { action: "[Pre] Logged in", expected: "" },
+    { action: 'Fill "QA Engineer" into "Search", press Enter', expected: 'Table contains "QA Engineer" :: really' },
+    { action: 'Click "A | B"', expected: "" },
+  ]);
+});

@@ -16,8 +16,8 @@ setup("authenticate", async ({ page }) => {
   await login.goto();
   await login.login(requireEnv("LOGIN_EMAIL"), requireEnv("LOGIN_PASSWORD"));
   if (process.env.TOTP_SECRET) await login.enterTotp(generateTotp(process.env.TOTP_SECRET));
-  // Landed inside the app: the login form must be gone. SETUP replaces this with a stronger
-  // app-specific check (an element that only exists after login) discovered through BROWSER.
-  await expect(login.loginForm).toBeHidden({ timeout: 30_000 });
+  // Landed inside the app: we must have left the login URL. SETUP adds a stronger app-specific
+  // check (an element that only exists after login) discovered through BROWSER.
+  await expect(page).not.toHaveURL(login.loggedOutUrl, { timeout: 30_000 });
   await page.context().storageState({ path: STORAGE });
 });

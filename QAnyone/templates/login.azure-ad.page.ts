@@ -4,6 +4,8 @@ import { BasePage } from "./base.page";
 /** Azure AD / Entra ID login (login.microsoftonline.com). Locators are [FROM TEMPLATE]. */
 export class LoginPage extends BasePage {
   readonly path = "/"; // the app redirects to Microsoft login
+  /** While the URL matches this, the user is still logged out. */
+  readonly loggedOutUrl = /login\.microsoftonline\.com/;
   readonly loginForm: Locator;
   readonly email: Locator;
   readonly next: Locator;
@@ -30,13 +32,20 @@ export class LoginPage extends BasePage {
     await this.next.click();
     await this.password.fill(password);
     await this.signIn.click();
+    await this.acceptStaySignedIn();
   }
 
   async enterTotp(code: string): Promise<void> {
     await this.totp.fill(code);
     await this.verify.click();
-    if (await this.staySignedInYes.isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await this.staySignedInYes.click();
-    }
+    await this.acceptStaySignedIn();
+  }
+
+  /** "Stay signed in?" appears after sign-in or after MFA; absent on some tenants. */
+  private async acceptStaySignedIn(): Promise<void> {
+    await this.staySignedInYes
+      .waitFor({ state: "visible", timeout: 5_000 })
+      .then(() => this.staySignedInYes.click())
+      .catch(() => undefined);
   }
 }

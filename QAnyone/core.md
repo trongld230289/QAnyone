@@ -7,7 +7,10 @@ app's source code. You work in GitHub Copilot Chat or Claude Code — see Platfo
 ## Startup (every new chat)
 1. READ `QANYONE_STATE.md` if it exists. It is the checkpoint: phase, auth, current TC and step.
 2. If `phase != ready` or `current_tc` is set → continue from `current_step` (see pipeline.md).
-   Do not re-ask questions that were already confirmed.
+   Do not re-ask questions that were already confirmed. Exception: when the user's message is
+   itself a command (`NEW TC …`, `RERUN TC …`, `STATUS`, `PUSH ADO …`, `SETUP`), mark the
+   abandoned TC `status: blocked` (note "abandoned by user"), clear `current_*`, and run the
+   new command instead.
 3. Then read ONLY the context file for the user's command (table below). Read `rules.md`
    before writing any POM/spec, `formats.md` before writing any TC/registry/state file.
 
@@ -38,14 +41,16 @@ Instruction files use abstract verbs. Translate with this table.
 | Instruction file | `.github/copilot-instructions.md` | `CLAUDE.md` |
 | MCP config | `.vscode/mcp.json` | `.mcp.json` |
 
-ASK is used in exactly three places: SETUP when a state file already exists, CONFIRM after
-NORMALIZE, and the preview before PUSH ADO. Every ASK has a fallback: tell the user which file
-to edit and to type `OK` when done. Never put a terminal command inside an ASK — the user
-cannot copy from a dialog; run it yourself.
+ASK (the dialog tool) is used in three places: SETUP when a state file already exists, CONFIRM
+after NORMALIZE, and the preview before PUSH ADO. Everything else that needs the user is a
+plain message ending with what to type (`OK`, a paste, an answer). Every ASK has the same
+fallback. Never put a terminal command inside an ASK — the user cannot copy from a dialog;
+run it yourself.
 
-BROWSER requires the Playwright MCP server (`@playwright/mcp`). If its tools are not available:
-say exactly what to enable (the MCP config file for this platform, then restart) and stop.
-Do not substitute DOM-dump scripts, `page.evaluate`, or guessed locators.
+BROWSER requires the Playwright MCP server (`@playwright/mcp`). If its tools are not available
+during NEW TC / RERUN TC: say exactly what to enable (the MCP config file for this platform,
+then restart) and stop. During SETUP, follow the codegen fallback in setup.md instead.
+Never substitute DOM-dump scripts, `page.evaluate`, or guessed locators.
 
 ## Hard rules
 1. Never guess a locator. Sources: pom-registry → TC Locators table → BROWSER. Tag every locator.
@@ -66,7 +71,9 @@ Non-blocking → fix and retry yourself, do not ask:
 - Command fails / TypeScript error / test fails → read the error, fix, rerun (test: ≤ 3 rounds).
 - Response was cut off → continue from where it stopped; do not restart.
 
-Blocking → WRITE state, explain what is blocked and what the user must do, then stop:
+Blocking → inside NEW TC / RERUN TC run pipeline steps 8–9 with `status: blocked` (this
+clears `current_*`); otherwise WRITE state. Then explain what is blocked and what the user
+must do, and stop:
 - Login cannot be completed (expired credentials, unsupported MFA, CAPTCHA).
 - ADO id does not exist, or ADO returns 401/403.
 - A locator cannot be resolved even through BROWSER, and the TC gives no disambiguating context.

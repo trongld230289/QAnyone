@@ -13,7 +13,7 @@ Frontmatter
 | feature | kebab-case; decides `tests/<feature>/` and `pom-registry/<feature>.md` |
 | page | route of the main page, e.g. `/jobs` |
 | tags | list; `regression` by default, `smoke` when the TC says so. Used as `@tag` in the spec |
-| status | `draft` → `confirmed` → `passing` / `failed` / `blocked` |
+| status | `draft` → `confirmed` → `passing` / `blocked` (blocked = self-heal exhausted, app bug, wrong TC, or abandoned) |
 | spec, last_run, heal_count | filled by the pipeline (steps 6–8) |
 
 Slug = title, lowercase, non-alphanumerics → `-`, max 40 chars.
@@ -27,7 +27,7 @@ Steps rules
 - Values that repeat or depend on the environment are `{{key}}` and declared in Test Data.
   A one-off literal may stay inline in quotes.
 - Every `Verify` row has a non-empty Expected. An Expected on an action row is allowed and
-  becomes an `expect()` right after that action.
+  becomes an `expect()` right after that action. A literal `|` inside a cell is written `\|`.
 - Language of Action/Expected text = `language` in state (`vi` or `en`).
 
 Locators table: filled by the pipeline from the registry / codegen / BROWSER. The user may
@@ -74,7 +74,7 @@ current_tc:             # id while NEW TC / RERUN TC is in progress, else empty
 current_step:           # 1-intake 2-normalize 3-map 4-discover 5-pom 6-spec 7-run 8-memory 9-report
 tcs: {}                 # id: status
 ```
-Written after every pipeline step. `current_tc` / `current_step` are cleared at 9-report.
+Written after every pipeline step. `current_tc` / `current_step` are cleared at 8-memory.
 
 ## 4. Config — `qanyone.config.md` (produced by the setup form)
 ```yaml

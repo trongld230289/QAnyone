@@ -39,5 +39,15 @@ test.describe("SMOKE todomvc", { tag: ["@smoke"] }, () => {
 EOF
 npx tsc -p tsconfig.json
 npx playwright test --project=chromium
+# A failing test must leave a trace for the self-heal / blocked report (plan Review: I1).
+cat > tests/fail.spec.ts <<'EOF2'
+import { test, expect } from "../fixtures/pages.fixture";
+test("deliberate failure leaves a trace", async ({ page }) => {
+  await page.goto("/todomvc");
+  await expect(page.getByRole("button", { name: "does not exist" })).toBeVisible({ timeout: 1000 });
+});
+EOF2
+npx playwright test --project=chromium tests/fail.spec.ts >/dev/null 2>&1 || true
+find test-results -name "trace.zip" | grep -q . && echo "trace.zip present on failure" || { echo "NO trace on failure"; exit 1; }
 test -f playwright/.auth/user.json && echo "storage state written (empty, no auth)"
 echo "scaffold-smoke OK"

@@ -4,6 +4,8 @@ import { BasePage } from "./base.page";
 /** Google sign-in (accounts.google.com). Locators are [FROM TEMPLATE]. */
 export class LoginPage extends BasePage {
   readonly path = "/"; // the app redirects to Google
+  /** While the URL matches this, the user is still logged out. */
+  readonly loggedOutUrl = /accounts\.google\.com/;
   readonly loginForm: Locator;
   readonly email: Locator;
   readonly next: Locator;

@@ -4,6 +4,8 @@ import { BasePage } from "./base.page";
 /** Standard email/password login. SETUP replaces the locators with ones discovered through BROWSER. */
 export class LoginPage extends BasePage {
   readonly path = "/login"; // SETUP: confirm the real login route
+  /** While the URL matches this, the user is still logged out. SETUP: confirm it. */
+  readonly loggedOutUrl = /\/login/;
   readonly loginForm: Locator;
   readonly email: Locator;
   readonly password: Locator;

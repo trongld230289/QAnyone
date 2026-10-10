@@ -11,7 +11,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: process.env.BASE_URL,
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },

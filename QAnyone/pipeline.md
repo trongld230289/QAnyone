@@ -26,14 +26,16 @@ say which MCP config to enable and stop). Numeric id but `ado_configured: false`
 
 ### 2. Normalize → `test-cases/<id>-<slug>.md`
 Write one file per test case from `QAnyone/templates/test-case.md` following formats.md §1:
-id (ADO id / id found in the file / next free `TC-<n>` — SEARCH `test-cases/` first and never
-reuse one), title, `source`, `source_ref`, `feature` and `page` inferred from the steps (URL
+id (ADO id · an id found in the file · otherwise the next free `TC-<n>` — SEARCH `test-cases/`
+first; several TCs in one file get consecutive numbers; an id found in the file that already
+exists in `test-cases/` is a collision → take the next free number and say so), title, `source`, `source_ref`, `feature` and `page` inferred from the steps (URL
 path or the page named in step 1), tags, `status: draft`. Rewrite steps with the fixed verbs,
 quoted element names, `{{key}}` data, `[Pre]` first row; move repeated literals into Test Data.
 Text language per state `language`.
 CONFIRM (sources `md` and `codegen` only; ADO skips it): print the Steps and Test Data tables
 of every file just written in the message, then ASK "Confirm these steps?" with the options
-`OK` / `I edited the file(s), re-read them`. Repeat until OK. Then `status: confirmed`.
+`OK` / `I edited the file(s), re-read them`. Repeat until OK. Then `status: confirmed`
+(ADO source: set `confirmed` directly).
 
 ### 3. Map
 READ `pom-registry/INDEX.md`, the `<feature>.md` of the TC, and `_shared.md` when the steps
@@ -89,8 +91,9 @@ Fail → read the error and `test-results/**/error-context.md`; apply only the a
 wrong TC → `status: blocked`, reason + trace path in the TC Notes.
 
 ### 8. Memory
-EDIT the TC frontmatter: `status: passing | failed | blocked`, `last_run`, `heal_count`.
-EDIT `pom-registry` `Used by`. EDIT state: `tcs.<id>`, clear `current_tc` / `current_step`.
+EDIT the TC frontmatter: `status: passing | blocked`, `last_run`, `heal_count` (+ the reason
+and trace path in Notes when blocked). EDIT `pom-registry` `Used by`. EDIT state: `tcs.<id>`,
+clear `current_tc` / `current_step`.
 
 ### 9. Report
 ```
@@ -110,11 +113,11 @@ Requires `ado_configured: true`. READ the TC file. Print the Steps table as it w
 ADO (row 1 precondition, rows 2+ action / expected, `{{key}}` replaced by Test Data values).
 ASK "Push to Azure DevOps?" with the options `Update existing TC <id>` (when source is ado or
 the id is numeric) · `Create new test case` (free text for an optional User Story id) · `Cancel`.
-- Update → RUN `npx tsx scripts/ado-writer.ts update --tc <id> --steps "<a>::<e>|…"`
-  (the `[Pre]` row goes first with an empty expected).
-- Create → RUN `npx tsx scripts/ado-writer.ts create --title "<title>" --steps "…" [--us <id>]`
-  → new ADO id → rename `test-cases/<old>-….md`, the spec file, the describe title and `tcs`
-  in state to the new id; `source_ref: ado:<id>`.
+- Update → RUN `npx tsx scripts/ado-writer.ts update --tc <id> --from test-cases/<id>-<slug>.md`
+  (the script reads Steps + Test Data and substitutes `{{key}}`; the `[Pre]` row goes first).
+- Create → RUN `npx tsx scripts/ado-writer.ts create --from test-cases/<id>-<slug>.md [--us <id>]`
+  → new ADO id → rename `test-cases/<old>-….md`, the spec file, the describe title, the
+  registry `Used by` ids and `tcs` in state to the new id; `source_ref: ado:<id>`.
 Report the ADO id and the work-item URL `<ado_org>/<project>/_workitems/edit/<id>`.
 
 ## STATUS

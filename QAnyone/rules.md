@@ -25,7 +25,7 @@
 - `Navigate` → `page.goto(path)` then `await expect(page).toHaveURL(...)`.
 - Wait only with `expect(...).toBeVisible()`, `toHaveURL`, `waitForURL`, `waitForResponse`.
   Hard sleeps are forbidden everywhere, including "to make the video readable" — the config
-  already records `trace: 'on-first-retry'` and `video: 'retain-on-failure'`.
+  already keeps `trace`, `video` and a screenshot for every failed test (`test-results/`).
 
 ### Known-hard patterns (wrong *action*, not wrong locator — check these before BROWSER)
 | Pattern | Symptom | Correct code |

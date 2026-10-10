@@ -24,7 +24,7 @@ const TOTAL_BUDGET = 55000;
 // Generic patterns live here. Private identifiers (employer names, internal hosts, machine
 // paths) go in tools/forbidden.local — one regex per line, git-ignored — so the repo itself
 // never carries them.
-const FORBIDDEN = [/cypress/i, /waitForTimeout/, /expect\.soft/, /â€/, /Ã/, /\bTODO\b/, /\bTBD\b/];
+const FORBIDDEN = [/cypress/i, /waitForTimeout/, /expect\.soft/, /â€/, /Ã/, /\bTODO\b/, /\bTBD\b/, /(READ|SEARCH) `\.env`/];
 const LOCAL = join(ROOT, "tools", "forbidden.local");
 if (existsSync(LOCAL)) {
   for (const line of readFileSync(LOCAL, "utf8").split(/\r?\n/)) {
