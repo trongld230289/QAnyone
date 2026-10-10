@@ -18,7 +18,7 @@ cp "$T/pages.fixture.ts" fixtures/pages.fixture.ts
 cp "$T/env.ts" helpers/env.ts
 cp "$T/totp.ts" helpers/totp.ts
 cp "$T/gitignore" .gitignore
-printf 'BASE_URL=https://demo.playwright.dev\nAUTH_REQUIRED=false\n' > .env
+printf 'BASE_URL=https://demo.playwright.dev\nAUTH_REQUIRED=false\nTRACE=on\n' > .env
 cat > tsconfig.json <<'EOF'
 { "compilerOptions": { "target": "ES2022", "module": "ESNext", "moduleResolution": "Bundler", "strict": true, "noEmit": true, "skipLibCheck": true, "types": ["node"] } }
 EOF
@@ -48,6 +48,8 @@ test("deliberate failure leaves a trace", async ({ page }) => {
 });
 EOF2
 npx playwright test --project=chromium tests/fail.spec.ts >/dev/null 2>&1 || true
-find test-results -name "trace.zip" | grep -q . && echo "trace.zip present on failure" || { echo "NO trace on failure"; exit 1; }
+find test-results -name "trace.zip" | grep -q . && echo "trace.zip present" || { echo "NO trace"; exit 1; }
+# TRACE=on in .env must also trace the passing smoke test (run flags are read from .env).
+[ "$(find test-results -name trace.zip | wc -l)" -ge 2 ] && echo "TRACE=on flag honoured (passing test traced too)" || { echo "TRACE=on flag ignored"; exit 1; }
 test -f playwright/.auth/user.json && echo "storage state written (empty, no auth)"
 echo "scaffold-smoke OK"

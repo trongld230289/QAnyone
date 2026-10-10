@@ -28,8 +28,9 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      `auth: none` → copy `T/login.form.page.ts` unchanged (auth.setup.ts imports it but skips login).
    - `sources` has `ado` → copy `T/scripts/fetch-tc.ts` and `T/scripts/ado-writer.ts → scripts/`.
    - WRITE `.env.example` from `T/env.example`, keeping only the keys this config needs
-     (`BASE_URL`, `AUTH_REQUIRED` always; login keys when auth ≠ none; `TOTP_SECRET` when totp;
-     ADO keys when sources has ado). Prefill `BASE_URL` with `base_url`; `AUTH_REQUIRED` is
+     (`BASE_URL`, `AUTH_REQUIRED` and the four run flags `HEADLESS`, `TRACE`, `VIDEO`,
+     `SCREENSHOT` always, with their defaults; login keys when auth ≠ none; `TOTP_SECRET` when
+     totp; ADO keys when sources has ado). Prefill `BASE_URL` with `base_url`; `AUTH_REQUIRED` is
      `true` iff auth ≠ none. `auth: none` and no ado → also WRITE `.env` with those two keys.
    - WRITE `pom-registry/INDEX.md` (table header only), `pom-registry/_shared.md` (empty
      heading), `test-cases/.gitkeep`, and `playwright/.auth/user.json` containing
