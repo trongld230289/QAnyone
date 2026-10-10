@@ -45,28 +45,31 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    `node -e "require('dotenv').config();const m=process.argv.slice(1).filter(k=>!process.env[k]);console.log(m.length?'missing: '+m.join(' '):'ok')" LOGIN_USERNAME LOGIN_PASSWORD`
    (list the keys this config needs). `missing:` → repeat the request, wait again.
    Set `ado_configured: true` when the three ADO keys are present.
-5. Auth first (auth ≠ none):
-   a. BROWSER: `browser_navigate` to `base_url`, `browser_snapshot`. Identify the login form,
-      email, password and submit elements and get a locator for each
-      (`browser_generate_locator`). For `azure-ad` / `google` the template locators are already
-      `[FROM TEMPLATE]`; only confirm the redirect to the provider happens.
-      `two_fa ≠ none` (or any step that only appears after submitting credentials): do not type
-      credentials yourself. Say "Log in once in the Playwright browser window that is open; tell
-      me when you are on the app's home page." After each page the user reaches,
-      `browser_snapshot` and take the 2FA input / button locators from it.
+5. Auth first (auth ≠ none). **The login itself is done by `tests/auth.setup.ts` with the
+   `.env` credentials — never ask the user to log in by hand when `two_fa: none`.**
+   a. BROWSER: `browser_navigate` to `base_url`, `browser_snapshot` of the login page only.
+      Identify the username, password and submit elements and get a locator for each
+      (`browser_generate_locator`). Do not type credentials in the MCP browser. For `azure-ad` /
+      `google` the template locators are already `[FROM TEMPLATE]`; only confirm the redirect
+      to the provider happens.
+      Only when `two_fa ≠ none`: the 2FA page exists only after submitting credentials, so say
+      "Log in once in the Playwright browser window that is open, up to the 2FA screen; tell me
+      when it shows." Then `browser_snapshot` and take the 2FA input / button locators from it.
       BROWSER unavailable → RUN BACKGROUND `npx playwright codegen <base_url>`, ask the user to
       log in once and paste the recorded code; take locators from it (`[FROM CODEGEN]`).
       Google sign-in often blocks automated browsers; if it does, report BLOCKING.
    b. EDIT `pages/login.page.ts` with the discovered locators, the real login route and
-      `loggedOutUrl`. Add to `tests/auth.setup.ts`, after the URL check, an `expect` on an
-      element that only exists after login (seen in the snapshot). Record `LoginPage` in
-      `pom-registry/_shared.md` with tags.
-   c. RUN `npx playwright test --project=setup`. Fail → read the error, fix locator / route
-      (max 3 rounds, rules.md Self-heal). CAPTCHA, unsupported MFA, wrong credentials →
-      BLOCKING.
+      `loggedOutUrl` (the URL pattern of the login page). Record `LoginPage` in
+      `pom-registry/_shared.md` with tags. Keep the URL check in `tests/auth.setup.ts` as is.
+   c. RUN `npx playwright test --project=setup` — this logs in with `LOGIN_USERNAME` /
+      `LOGIN_PASSWORD` from `.env` and saves the storage state. Fail → read the error, fix
+      locator / route (max 3 rounds, rules.md Self-heal). CAPTCHA, unsupported MFA, wrong
+      credentials → BLOCKING.
    d. Verify `playwright/.auth/user.json` exists and is larger than 100 bytes. EDIT state:
       `auth_ready: true`, `auth_updated: <today>`. Say: "Restart the Playwright MCP server so it
-      picks up the storage state."
+      picks up the storage state." Optional, after the restart: `browser_navigate` to
+      `base_url` (now logged in), pick one element that only exists after login, and add an
+      `expect` on it to `tests/auth.setup.ts` as a stronger check.
 6. auth = none: RUN `npx playwright test --project=setup` (writes an empty storage state),
    then BROWSER `browser_navigate` to `base_url` and confirm the page title is non-empty.
    BROWSER unavailable → say which MCP config to enable; this is not blocking for SETUP.
