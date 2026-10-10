@@ -223,12 +223,12 @@
     <p class="apply">Applying CodeGen to Automation Testing</p>
     <div class="green-mono">QA + Anyone · Automation for everyone</div>
     <div class="big">QAnyone</div>
-    <p class="oneliner">From manual UI recording to Azure DevOps — in a single command.</p>
+    <p class="oneliner">From a test case — ADO, markdown or a recorded flow — to a passing Playwright test, in one command.</p>
 
     <div class="stepcards">
       <div class="stepcard sketch shadowed" style="--c:var(--blue)">
         <div class="no">01</div>
-        <div><h3>Setup</h3><p>Configure the project once — two entry modes</p></div>
+        <div><h3>Setup</h3><p>One command, one offline form — new or existing repo</p></div>
       </div>
       <div class="stepcard sketch shadowed" style="--c:var(--green)">
         <div class="no">02</div>
@@ -237,9 +237,9 @@
     </div>
 
     <div class="chips">
-      <span class="chip sketch" style="--c:var(--blue)">Playwright / Cypress</span>
-      <span class="chip sketch" style="--c:var(--purple)">GitHub Copilot Agent</span>
-      <span class="chip sketch" style="--c:var(--green)">MCP Browser</span>
+      <span class="chip sketch" style="--c:var(--blue)">Playwright</span>
+      <span class="chip sketch" style="--c:var(--purple)">Copilot Chat · Claude Code</span>
+      <span class="chip sketch" style="--c:var(--green)">Playwright MCP</span>
       <span class="chip sketch" style="--c:var(--orange)">Azure DevOps</span>
       <span class="chip sketch" style="--c:var(--blue)">Self-Healing</span>
     </div>
@@ -252,42 +252,42 @@
     <div class="uline" style="--c:var(--orange)"></div>
 
     <div class="bar sketch shadowed" style="--c:var(--orange)">
-      📁 <strong>INSTALL (one-time):</strong> copy <code>QAnyone/</code> folder + <code>.github/copilot-instructions.md</code> into your repo
+      📁 <strong>INSTALL (one-time):</strong> <code>npx github:trongld230289/QAnyone init</code> in an empty test repo — then type <code>SETUP</code>
     </div>
 
     <div class="grid two" style="margin-top:22px">
       <div class="card sketch shadowed" style="--c:var(--blue)">
         <div class="head">
-          <span class="icirc sketch" style="--c:var(--blue)">🆕</span>
-          <h3>START</h3>
+          <span class="icirc sketch" style="--c:var(--blue)">🧭</span>
+          <h3>SETUP</h3>
         </div>
-        <div class="caps">New project from scratch</div>
+        <div class="caps">One command — auto-detects the situation</div>
         <ul>
-          <li>Guided interview — up to <b>15 questions</b></li>
-          <li>Framework, auth &amp; user flows captured</li>
-          <li>Auth-first: verified before any feature POM</li>
-          <li>Generates <code>QANYONE_STATE.md</code> + POM registry</li>
+          <li>Empty repo → scaffolds a full Playwright project</li>
+          <li>Existing Playwright repo → scans and imports it</li>
+          <li>Auth-first: login verified before any feature POM</li>
+          <li>Writes <code>QANYONE_STATE.md</code> + feature-split POM registry</li>
         </ul>
       </div>
       <div class="card sketch shadowed" style="--c:var(--purple)">
         <div class="head">
-          <span class="icirc sketch" style="--c:var(--purple)">📦</span>
-          <h3>ONBOARD</h3>
+          <span class="icirc sketch" style="--c:var(--purple)">📝</span>
+          <h3>Setup form</h3>
         </div>
-        <div class="caps">Import an existing project</div>
+        <div class="caps">Offline HTML, no chat ping-pong</div>
         <ul>
-          <li>Auto-scans repo &amp; detects config</li>
-          <li>Fast path when <code>QANYONE_STATE.md</code> exists</li>
-          <li>Confirms Base URL, auth &amp; ADO integration</li>
-          <li>Rebuilds project memory in seconds</li>
+          <li><b>10 questions</b>, shown/hidden by your answers</li>
+          <li>Add your own question/answer pairs</li>
+          <li>Generate → paste one markdown block into the chat</li>
+          <li>Secrets never go through the form — only <code>.env</code></li>
         </ul>
       </div>
     </div>
 
     <div class="grid four" style="margin-top:22px">
-      <div class="stat sketch shadowed" style="--c:var(--blue)"><b>2</b><span>Entry modes</span></div>
-      <div class="stat sketch shadowed" style="--c:var(--purple)"><b>≤15</b><span>Setup questions</span></div>
-      <div class="stat sketch shadowed" style="--c:var(--green)"><b>1×</b><span>One-time config</span></div>
+      <div class="stat sketch shadowed" style="--c:var(--blue)"><b>1</b><span>Setup command</span></div>
+      <div class="stat sketch shadowed" style="--c:var(--purple)"><b>10</b><span>Form questions</span></div>
+      <div class="stat sketch shadowed" style="--c:var(--green)"><b>2</b><span>AI platforms</span></div>
       <div class="stat sketch shadowed" style="--c:var(--orange)"><b>Auth</b><span>Verified first</span></div>
     </div>
   </section>
@@ -299,20 +299,24 @@
     <div class="uline" style="--c:var(--green)"></div>
 
     <div class="terminal">
-      <span class="t"><span class="d">$</span> NEW TC <span class="a">&lt;ID / name&gt;</span></span>
+      <span class="t"><span class="d">$</span> NEW TC <span class="a">&lt;ADO id | path.md | name&gt;</span></span>
     </div>
 
     <div class="pipe">
       <!-- INPUT -->
       <div class="col">
-        <div class="grouplabel sketch" style="--c:var(--blue)"><span class="caps">① Input — pick a mode</span></div>
+        <div class="grouplabel sketch" style="--c:var(--blue)"><span class="caps">① Input — three sources, one format</span></div>
         <div class="minirow sketch" style="--c:var(--blue)">
           <span class="icirc sketch" style="--c:var(--blue)">🎫</span>
-          <div><h4>Fetch TC <span class="tag">&lt;ID&gt;</span></h4><p>Pull an existing case from Azure DevOps</p></div>
+          <div><h4>ADO <span class="tag">&lt;id&gt;</span></h4><p>Pull an existing case from Azure DevOps</p></div>
+        </div>
+        <div class="minirow sketch" style="--c:var(--orange)">
+          <span class="icirc sketch" style="--c:var(--orange)">📄</span>
+          <div><h4>Markdown <span class="tag">&lt;path.md&gt;</span></h4><p>Any shape — normalized, confirmed once</p></div>
         </div>
         <div class="minirow sketch" style="--c:var(--purple)">
           <span class="icirc sketch" style="--c:var(--purple)">🎥</span>
-          <div><h4>Codegen <span class="tag">&lt;name&gt;</span></h4><p>Record UI actions — a brand-new flow</p></div>
+          <div><h4>Codegen <span class="tag">&lt;name&gt;</span></h4><p>Record the flow once in a browser</p></div>
         </div>
       </div>
 
@@ -323,8 +327,8 @@
         <div class="grouplabel sketch" style="--c:var(--blue)"><span class="caps">② Automate — same engine</span></div>
         <div class="subcols">
           <div class="subcard sketch" style="--c:var(--blue)"><span class="icirc sketch" style="--c:var(--blue)">🧠</span><div class="t">AI Agent</div><p>reads POM memory</p></div>
-          <div class="subcard sketch" style="--c:var(--blue)"><span class="icirc sketch" style="--c:var(--blue)">📄</span><div class="t">POM + Spec</div><p>zero-guess locators (MCP)</p></div>
-          <div class="subcard sketch" style="--c:var(--blue)"><span class="icirc sketch" style="--c:var(--blue)">🔁</span><div class="t">Run · Self-heal ×3</div><p>auto-fix failures</p></div>
+          <div class="subcard sketch" style="--c:var(--blue)"><span class="icirc sketch" style="--c:var(--blue)">📄</span><div class="t">POM + Spec</div><p>zero-guess locators (Playwright MCP)</p></div>
+          <div class="subcard sketch" style="--c:var(--blue)"><span class="icirc sketch" style="--c:var(--blue)">🔁</span><div class="t">Run · Self-heal ×3</div><p>fix locators &amp; waits — never assertions</p></div>
         </div>
       </div>
 
@@ -332,20 +336,20 @@
 
       <!-- PUBLISH -->
       <div class="col">
-        <div class="grouplabel sketch" style="--c:var(--green)"><span class="caps">③ Publish — to Azure DevOps</span></div>
+        <div class="grouplabel sketch" style="--c:var(--green)"><span class="caps">③ Publish — <code>PUSH ADO</code>, on demand</span></div>
         <div class="minirow sketch" style="--c:var(--green)">
           <span class="icirc sketch" style="--c:var(--green)">♻️</span>
-          <div><h4>Update TC <span class="tag">&lt;ID&gt;</span></h4><p>Refresh the existing case + push result</p></div>
+          <div><h4>Update TC <span class="tag">&lt;id&gt;</span></h4><p>Refresh the existing case on Azure DevOps</p></div>
         </div>
         <div class="minirow sketch" style="--c:var(--orange)">
           <span class="icirc sketch" style="--c:var(--orange)">✨</span>
-          <div><h4>Create TC <span class="tag">&lt;name&gt;</span></h4><p>Publish a new case to Azure DevOps</p></div>
+          <div><h4>Create TC</h4><p>New case, optional User Story link — after a preview</p></div>
         </div>
       </div>
     </div>
 
     <div class="callout sketch shadowed" style="--c:var(--green)">
-      <span class="warn">⚡ Zero questions · zero confirmations</span> — the AI runs A→Z and self-heals up to 3 retries on failure.
+      <span class="warn">⚡ One confirmation, then hands-off</span> — ADO cases run with no questions; markdown and codegen cases get one review of the normalized steps. Self-heal ≤ 3 rounds, never by weakening an assertion.
     </div>
 
     <!-- LIVE RUN SIMULATION -->
@@ -355,15 +359,15 @@
       </div>
       <div class="runsim-grid">
         <ol class="stepper" id="stepper" aria-label="Pipeline stages">
-          <li data-i="0"><span class="dot"></span><div class="sx"><b>Input</b><small>Fetch TC / Codegen</small></div></li>
-          <li data-i="1"><span class="dot"></span><div class="sx"><b>Reflect</b><small>Analyze &amp; map steps</small></div></li>
-          <li data-i="2"><span class="dot"></span><div class="sx"><b>POM check</b><small>Read POM_REGISTRY</small></div></li>
-          <li data-i="3"><span class="dot"></span><div class="sx"><b>Discovery</b><small>Locator cascade</small></div></li>
-          <li data-i="4"><span class="dot"></span><div class="sx"><b>Update POM</b><small>Save new locators</small></div></li>
-          <li data-i="5"><span class="dot"></span><div class="sx"><b>Generate test</b><small>Spec from TC</small></div></li>
-          <li data-i="6"><span class="dot"></span><div class="sx"><b>Run · Self-heal</b><small>Auto-fix ×3</small></div></li>
-          <li data-i="7"><span class="dot"></span><div class="sx"><b>Update memory</b><small>State + registry</small></div></li>
-          <li data-i="8"><span class="dot"></span><div class="sx"><b>Publish</b><small>Push to Azure DevOps</small></div></li>
+          <li data-i="0"><span class="dot"></span><div class="sx"><b>Intake</b><small>ADO / markdown / codegen</small></div></li>
+          <li data-i="1"><span class="dot"></span><div class="sx"><b>Normalize</b><small>One TC file, fixed verbs</small></div></li>
+          <li data-i="2"><span class="dot"></span><div class="sx"><b>Map</b><small>Read pom-registry by feature</small></div></li>
+          <li data-i="3"><span class="dot"></span><div class="sx"><b>Discover</b><small>Playwright MCP, missing only</small></div></li>
+          <li data-i="4"><span class="dot"></span><div class="sx"><b>POM</b><small>Page object + fixture</small></div></li>
+          <li data-i="5"><span class="dot"></span><div class="sx"><b>Spec</b><small>test.step per TC row</small></div></li>
+          <li data-i="6"><span class="dot"></span><div class="sx"><b>Run · Self-heal</b><small>≤ 3 rounds</small></div></li>
+          <li data-i="7"><span class="dot"></span><div class="sx"><b>Memory</b><small>State + registry</small></div></li>
+          <li data-i="8"><span class="dot"></span><div class="sx"><b>Report</b><small>Result + HTML report</small></div></li>
         </ol>
         <div class="console">
           <div class="con-bar"><i></i><i></i><i></i><span>qanyone · terminal</span></div>
@@ -380,7 +384,7 @@
     <div class="uline" style="--c:var(--purple)"></div>
 
     <div class="bar sketch shadowed" style="--c:var(--orange)">
-      🧠 <strong>MEMORY:</strong> every TC writes to <code>POM_REGISTRY</code> · caches · <code>QANYONE_STATE</code> — reused for free next time
+      🧠 <strong>MEMORY:</strong> every TC writes to <code>pom-registry/</code> · <code>test-cases/</code> · <code>QANYONE_STATE.md</code> — reused for free next time
     </div>
 
     <div class="grid two" style="margin-top:22px">
@@ -388,28 +392,28 @@
         <div class="head"><span class="icirc sketch" style="--c:var(--blue)">🧠</span><h3>REMEMBERS</h3></div>
         <div class="caps">What it stores after each TC</div>
         <ul>
-          <li><code>POM_REGISTRY.md</code> — every locator, reused at <b>~0 token</b></li>
-          <li>Codegen + MCP snapshot cache — page discovery kept</li>
-          <li><code>QANYONE_STATE.md</code> — progress checkpoint, resume anytime</li>
+          <li><code>pom-registry/&lt;feature&gt;.md</code> — locators per feature, read only what the TC touches</li>
+          <li><code>test-cases/&lt;id&gt;.md</code> — the source of truth, with its own locator table</li>
+          <li><code>QANYONE_STATE.md</code> — checkpoint after every step, resume in a new chat</li>
           <li>Read once at session start — instant resume</li>
         </ul>
       </div>
       <div class="card sketch shadowed" style="--c:var(--purple)">
         <div class="head"><span class="icirc sketch" style="--c:var(--purple)">📈</span><h3>REUSES</h3></div>
-        <div class="caps">Locator cascade — cheapest first</div>
+        <div class="caps">Locator sources — cheapest first</div>
         <ul>
-          <li>POM registry ~0t → codegen cache ~200t</li>
-          <li>Fresh codegen 200–800t only when page is new</li>
-          <li>MCP fallback 3k–12k t — last resort only</li>
-          <li>90%+ locators reused — MCP rarely needed</li>
+          <li>Registry hit → reuse, no browser needed</li>
+          <li>Codegen paste → locators already recorded</li>
+          <li>Playwright MCP → only for elements still missing</li>
+          <li>Never guessed — every locator carries its source tag</li>
         </ul>
       </div>
     </div>
 
     <div class="grid four" style="margin-top:22px">
       <div class="stat sketch shadowed" style="--c:var(--blue)"><b>1st</b><span>TC discovers pages</span></div>
-      <div class="stat sketch shadowed" style="--c:var(--purple)"><b>Next</b><span>Reuses memory ~0t</span></div>
-      <div class="stat sketch shadowed" style="--c:var(--green)"><b>40–55%</b><span>Fewer tokens vs MCP</span></div>
+      <div class="stat sketch shadowed" style="--c:var(--purple)"><b>Next</b><span>Reuses the registry</span></div>
+      <div class="stat sketch shadowed" style="--c:var(--green)"><b>~7k</b><span>Tokens of instructions</span></div>
       <div class="stat sketch shadowed" style="--c:var(--orange)"><b>∞</b><span>Smarter each run</span></div>
     </div>
   </section>
@@ -419,13 +423,13 @@
     <div class="kicker">Demo</div>
     <h2 class="title">DEMO — Live walkthrough</h2>
     <div class="uline" style="--c:var(--blue)"></div>
-    <p class="sub">Watch QAnyone turn a screen recording into a published Azure DevOps test — in one command.</p>
+    <p class="sub">Watch QAnyone turn a markdown test case into a passing Playwright test — in one command.</p>
     <div class="flow-demo">
-      <div class="fbox sketch shadowed" style="--c:var(--purple)">🎥 Record the UI flow</div>
+      <div class="fbox sketch shadowed" style="--c:var(--purple)">📄 Write or record the case</div>
       <span class="arrow">➜</span>
       <div class="fbox sketch shadowed" style="--c:var(--green)">⚡ Run <code>NEW TC</code></div>
       <span class="arrow">➜</span>
-      <div class="fbox sketch shadowed" style="--c:var(--blue)">✅ Live on Azure DevOps</div>
+      <div class="fbox sketch shadowed" style="--c:var(--blue)">✅ Passing spec · <code>PUSH ADO</code> optional</div>
     </div>
   </section>
 
@@ -437,15 +441,15 @@
     <table>
       <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td><code>QAnyone/qanyone-master.md</code></td><td>Master orchestrator — routing &amp; TC Mode commands</td></tr>
-        <tr><td><code>QAnyone/qanyone-discuss.md</code></td><td>Phase 1 — requirements gathering (≤15 questions)</td></tr>
-        <tr><td><code>QAnyone/qanyone-plan.md</code></td><td>Phase 2 — technical planning</td></tr>
-        <tr><td><code>QAnyone/qanyone-execute.md</code></td><td>Phase 3 — code execution + TC Mode</td></tr>
-        <tr><td><code>QAnyone/qanyone-onboard.md</code></td><td>ONBOARD — import an existing project</td></tr>
-        <tr><td><code>QAnyone/qanyone-verify.md</code></td><td>Verification (placeholder for dev projects)</td></tr>
-        <tr><td><code>.github/copilot-instructions.md</code></td><td>Framework entry point for the AI agent</td></tr>
-        <tr><td><code>QANYONE_STATE.md</code></td><td>Current pipeline state (generated)</td></tr>
-        <tr><td><code>POM_REGISTRY.md</code></td><td>POM memory — locators reused across runs (generated)</td></tr>
+        <tr><td><code>QAnyone/core.md</code></td><td>Commands, platform tool map, hard rules, error handling</td></tr>
+        <tr><td><code>QAnyone/setup.md</code></td><td><code>SETUP</code> — scaffold / onboard / resume</td></tr>
+        <tr><td><code>QAnyone/pipeline.md</code></td><td><code>NEW TC</code>, <code>RERUN TC</code>, <code>PUSH ADO</code>, <code>STATUS</code></td></tr>
+        <tr><td><code>QAnyone/formats.md</code></td><td>Test case, registry, state and config formats</td></tr>
+        <tr><td><code>QAnyone/rules.md</code></td><td>Locator, action, assertion and self-heal rules</td></tr>
+        <tr><td><code>QAnyone/setup/index.html</code></td><td>Offline setup form</td></tr>
+        <tr><td><code>QAnyone/templates/</code></td><td>Playwright config, auth setup, page objects, fixture, helpers, ADO scripts</td></tr>
+        <tr><td><code>CLAUDE.md</code> · <code>.github/copilot-instructions.md</code></td><td>Entry points for Claude Code and Copilot Chat</td></tr>
+        <tr><td><code>test-cases/</code> · <code>pom-registry/</code> · <code>QANYONE_STATE.md</code></td><td>Generated memory (source of truth, locators, checkpoint)</td></tr>
       </tbody>
     </table>
   </section>
@@ -458,29 +462,29 @@
   // Real-time run log — stage index maps to the stepper (0..8), 9 = finished
   var EVENTS = [
     {s:0, t:"$ NEW TC 102874", c:"cmd"},
-    {s:0, t:"▶ Fetching TC #102874 from Azure DevOps…", c:"run"},
-    {s:0, t:"✓ 8 test steps parsed from ADO", c:"ok"},
-    {s:1, t:"▶ Reflect — mapping actions → intent (Given / When / Then)", c:"run"},
-    {s:1, t:"✓ 1 precondition + 7 action steps identified", c:"ok"},
-    {s:2, t:"▶ Reading POM_REGISTRY.md …", c:"run"},
-    {s:2, t:"✓ 6 / 8 locators already cached   ~0 tokens", c:"ok"},
-    {s:3, t:"▶ Discovery — 2 elements missing on /schedule", c:"run"},
-    {s:3, t:"· POM miss → codegen cache miss → running codegen (~420t)", c:"info"},
-    {s:3, t:"✓ 2 new locators captured   [FROM CODEGEN]", c:"ok"},
-    {s:4, t:"▶ Updating SchedulePage POM  (+2 locators)", c:"run"},
-    {s:4, t:"✓ POM_REGISTRY.md updated", c:"ok"},
-    {s:5, t:"▶ Generating spec → 102874-verify-schedule.spec.ts", c:"run"},
-    {s:5, t:"✓ Spec synced from test case (source of truth)", c:"ok"},
-    {s:6, t:"▶ Run · attempt 1 / 3 …", c:"run"},
-    {s:6, t:"✗ 1 failing — selector timeout on “Confirm”", c:"warn"},
-    {s:6, t:"↻ Self-heal — re-resolving locator via getByRole", c:"heal"},
-    {s:6, t:"▶ Run · attempt 2 / 3 …", c:"run"},
+    {s:0, t:"▶ Intake — fetching TC #102874 from Azure DevOps…", c:"run"},
+    {s:0, t:"✓ 8 steps received", c:"ok"},
+    {s:1, t:"▶ Normalize → test-cases/102874-verify-schedule.md", c:"run"},
+    {s:1, t:"✓ 1 [Pre] + 7 action rows · fixed verbs · ADO source, no confirm needed", c:"ok"},
+    {s:2, t:"▶ Map — reading pom-registry/INDEX.md + schedule.md", c:"run"},
+    {s:2, t:"✓ 6 / 8 elements already in the registry", c:"ok"},
+    {s:3, t:"▶ Discover — 2 elements missing on /schedule", c:"run"},
+    {s:3, t:"· Playwright MCP snapshot → generate_locator ×2", c:"info"},
+    {s:3, t:"✓ 2 locators added   [FROM MCP]", c:"ok"},
+    {s:4, t:"▶ POM — SchedulePage (+2 locators) · fixture registered", c:"run"},
+    {s:4, t:"✓ pom-registry/schedule.md updated", c:"ok"},
+    {s:5, t:"▶ Spec → tests/schedule/102874-verify-schedule.spec.ts", c:"run"},
+    {s:5, t:"✓ 8 test.step() · 3 expect() · tsc clean", c:"ok"},
+    {s:6, t:"▶ Run · round 1 / 3 …", c:"run"},
+    {s:6, t:"✗ 1 failing — strict mode: 2 buttons named “Confirm”", c:"warn"},
+    {s:6, t:"↻ Self-heal — scoped to row “Job A” via getByRole('row')", c:"heal"},
+    {s:6, t:"▶ Run · round 2 / 3 …", c:"run"},
     {s:6, t:"✓ 8 / 8 steps passed", c:"ok"},
-    {s:7, t:"▶ Writing POM_REGISTRY.md · QANYONE_STATE.md", c:"run"},
-    {s:7, t:"✓ Memory checkpoint saved — resume anytime", c:"ok"},
-    {s:8, t:"▶ Publish — Update TC #102874 on Azure DevOps", c:"run"},
-    {s:8, t:"✓ TC #102874 updated · result pushed to ADO", c:"ok"},
-    {s:9, t:"● DONE — zero questions · self-healed ×1 · 8/8 passed", c:"done"}
+    {s:7, t:"▶ Memory — TC status: passing · registry · QANYONE_STATE.md", c:"run"},
+    {s:7, t:"✓ Checkpoint saved — resume anytime", c:"ok"},
+    {s:8, t:"▶ Report — steps 8 · locators 6 reused / 2 new · heal ×1", c:"run"},
+    {s:8, t:"✓ npx playwright show-report", c:"ok"},
+    {s:9, t:"● DONE — passing · self-healed ×1 · PUSH ADO 102874 when ready", c:"done"}
   ];
 
   var body   = document.getElementById("conBody");
