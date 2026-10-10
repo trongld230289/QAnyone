@@ -21,11 +21,17 @@ const BUDGET = {
   "QAnyone/formats.md": 9000, "QAnyone/rules.md": 9000,
 };
 const TOTAL_BUDGET = 55000;
-const FORBIDDEN = [
-  /example-corp/i, /my-org/i, /my-project/i, /example-test-repo/i, /\bmcp_playwright\b(?!_)/i,
-  /user-id/, /example-domain/i, /smart-?scheduling/i, /cypress/i, /waitForTimeout/, /expect\.soft/,
-  /â€/, /Ã/, /\bTODO\b/, /\bTBD\b/,
-];
+// Generic patterns live here. Private identifiers (employer names, internal hosts, machine
+// paths) go in tools/forbidden.local — one regex per line, git-ignored — so the repo itself
+// never carries them.
+const FORBIDDEN = [/cypress/i, /waitForTimeout/, /expect\.soft/, /â€/, /Ã/, /\bTODO\b/, /\bTBD\b/];
+const LOCAL = join(ROOT, "tools", "forbidden.local");
+if (existsSync(LOCAL)) {
+  for (const line of readFileSync(LOCAL, "utf8").split(/\r?\n/)) {
+    const t = line.trim();
+    if (t && !t.startsWith("#")) FORBIDDEN.push(new RegExp(t, "i"));
+  }
+}
 const SKIP_DIRS = new Set(["node_modules", ".git", "docs", "test-results", "playwright-report", ".superpowers", ".vscode"]);
 const TEXT_RE = /\.(md|html|ts|json|example|mjs|sh|yml|yaml)$|\/gitignore$/;
 
