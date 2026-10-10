@@ -41,7 +41,7 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
 4. If auth ≠ none or sources has ado: say "Copy `.env.example` to `.env`, fill the values, then
    type `OK`." Wait. On `OK`: never open or search `.env` (its lines would land in the
    transcript). RUN a check that prints key names only:
-   `node -e "require('dotenv').config();const m=process.argv.slice(1).filter(k=>!process.env[k]);console.log(m.length?'missing: '+m.join(' '):'ok')" LOGIN_EMAIL LOGIN_PASSWORD`
+   `node -e "require('dotenv').config();const m=process.argv.slice(1).filter(k=>!process.env[k]);console.log(m.length?'missing: '+m.join(' '):'ok')" LOGIN_USERNAME LOGIN_PASSWORD`
    (list the keys this config needs). `missing:` → repeat the request, wait again.
    Set `ado_configured: true` when the three ADO keys are present.
 5. Auth first (auth ≠ none):

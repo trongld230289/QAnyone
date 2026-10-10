@@ -7,7 +7,7 @@ export class LoginPage extends BasePage {
   /** While the URL matches this, the user is still logged out. */
   readonly loggedOutUrl = /accounts\.google\.com/;
   readonly loginForm: Locator;
-  readonly email: Locator;
+  readonly username: Locator;
   readonly next: Locator;
   readonly password: Locator;
   readonly totp: Locator;
@@ -15,14 +15,14 @@ export class LoginPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.loginForm = page.locator("form");
-    this.email = page.locator("input[type=email]");
+    this.username = page.locator("input[type=email]");
     this.next = page.getByRole("button", { name: "Next" });
     this.password = page.locator("input[type=password]");
     this.totp = page.locator("input[type=tel]");
   }
 
-  async login(email: string, password: string): Promise<void> {
-    await this.email.fill(email);
+  async login(username: string, password: string): Promise<void> {
+    await this.username.fill(username);
     await this.next.click();
     await this.password.fill(password);
     await this.next.click();

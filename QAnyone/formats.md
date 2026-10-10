@@ -98,5 +98,5 @@ Read once by SETUP; afterwards `QANYONE_STATE.md` is the source of truth. Notes 
 free context: read them before writing auth code and before DISCOVER on a new page.
 
 ## 5. `.env` (never committed, never read for values)
-`BASE_URL`, `AUTH_REQUIRED=true|false`, `LOGIN_EMAIL`, `LOGIN_PASSWORD`, `TOTP_SECRET`,
+`BASE_URL`, `AUTH_REQUIRED=true|false`, `LOGIN_USERNAME`, `LOGIN_PASSWORD`, `TOTP_SECRET`,
 `ADO_ORG`, `ADO_PROJECT`, `ADO_PAT`. SETUP writes `.env.example` with only the keys the config needs.

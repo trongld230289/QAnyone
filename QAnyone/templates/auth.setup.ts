@@ -14,7 +14,7 @@ setup("authenticate", async ({ page }) => {
   }
   const login = new LoginPage(page);
   await login.goto();
-  await login.login(requireEnv("LOGIN_EMAIL"), requireEnv("LOGIN_PASSWORD"));
+  await login.login(requireEnv("LOGIN_USERNAME"), requireEnv("LOGIN_PASSWORD"));
   if (process.env.TOTP_SECRET) await login.enterTotp(generateTotp(process.env.TOTP_SECRET));
   // Landed inside the app: we must have left the login URL. SETUP adds a stronger app-specific
   // check (an element that only exists after login) discovered through BROWSER.

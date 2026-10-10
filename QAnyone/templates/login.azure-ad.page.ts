@@ -7,7 +7,7 @@ export class LoginPage extends BasePage {
   /** While the URL matches this, the user is still logged out. */
   readonly loggedOutUrl = /login\.microsoftonline\.com/;
   readonly loginForm: Locator;
-  readonly email: Locator;
+  readonly username: Locator;
   readonly next: Locator;
   readonly password: Locator;
   readonly signIn: Locator;
@@ -18,7 +18,7 @@ export class LoginPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.loginForm = page.locator("form[name=f1]");
-    this.email = page.locator("input[name=loginfmt]");
+    this.username = page.locator("input[name=loginfmt]");
     this.next = page.getByRole("button", { name: "Next" });
     this.password = page.locator("input[name=passwd]");
     this.signIn = page.getByRole("button", { name: "Sign in" });
@@ -27,8 +27,8 @@ export class LoginPage extends BasePage {
     this.staySignedInYes = page.getByRole("button", { name: "Yes" });
   }
 
-  async login(email: string, password: string): Promise<void> {
-    await this.email.fill(email);
+  async login(username: string, password: string): Promise<void> {
+    await this.username.fill(username);
     await this.next.click();
     await this.password.fill(password);
     await this.signIn.click();
