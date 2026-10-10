@@ -24,6 +24,7 @@ app's source code. You work in GitHub Copilot Chat or Claude Code — see Platfo
 | `RERUN TC <id>` | pipeline.md | Re-run one test; regenerate spec first if its TC file changed |
 | `STATUS` | pipeline.md | Print phase, auth state, TC list with status, registry counts |
 | `PUSH ADO <id>` | pipeline.md | Create/update the test case on Azure DevOps after a preview |
+| `UPDATE` | setup.md | After `npx … update`: sync generated files with the new templates, keeping user values |
 
 Several ids: `NEW TC 101 102 103` → run the pipeline per id, sequentially.
 Anything else → answer briefly and show this table. Do not start work without a command.

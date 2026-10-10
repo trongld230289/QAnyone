@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -36,4 +38,42 @@ test("unknown command exits non-zero with usage", () => {
   const r = run("frobnicate");
   assert.notEqual(r.status, 0);
   assert.match(r.stderr, /usage/i);
+});
+
+test("update refreshes framework files and points to the UPDATE command", () => {
+  const dir = mkdtempSync(join(tmpdir(), "qanyone-update-"));
+  assert.equal(run("init", dir).status, 0);
+  const core = join(dir, "QAnyone", "core.md");
+  const { writeFileSync } = require("node:fs");
+  writeFileSync(core, "stale");
+  const r = run("update", dir);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(readFileSync(core, "utf8"), readFileSync(join(ROOT, "QAnyone/core.md"), "utf8"));
+  assert.match(r.stdout, /UPDATE/);
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test("init keeps an existing CLAUDE.md and appends the QAnyone block once; update replaces it", () => {
+  const { writeFileSync, mkdirSync } = require("node:fs");
+  const dir = mkdtempSync(join(tmpdir(), "qanyone-merge-"));
+  mkdirSync(join(dir, ".github"), { recursive: true });
+  writeFileSync(join(dir, "CLAUDE.md"), "# My project rules\n\nAlways use pnpm.\n");
+  writeFileSync(join(dir, ".github", "copilot-instructions.md"), "Team conventions here.\n");
+  assert.equal(run("init", dir).status, 0);
+  let claude = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+  assert.match(claude, /Always use pnpm\./);
+  assert.match(claude, /<!-- qanyone:start -->[\s\S]*READ `QAnyone\/core\.md`[\s\S]*<!-- qanyone:end -->/);
+  assert.equal(claude.match(/qanyone:start/g).length, 1);
+  const copilot = readFileSync(join(dir, ".github", "copilot-instructions.md"), "utf8");
+  assert.match(copilot, /Team conventions here\./);
+  assert.match(copilot, /qanyone:start/);
+  // simulate an older block, then update must replace it, not duplicate it
+  writeFileSync(join(dir, "CLAUDE.md"), claude.replace("READ `QAnyone/core.md`", "READ `QAnyone/old.md`"));
+  assert.equal(run("update", dir).status, 0);
+  claude = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+  assert.match(claude, /Always use pnpm\./);
+  assert.match(claude, /READ `QAnyone\/core\.md`/);
+  assert.doesNotMatch(claude, /old\.md/);
+  assert.equal(claude.match(/qanyone:start/g).length, 1);
+  rmSync(dir, { recursive: true, force: true });
 });

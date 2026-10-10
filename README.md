@@ -17,7 +17,16 @@ npx github:trongld230289/QAnyone init
 Then open the folder in Copilot Chat (Agent mode) or Claude Code and type `SETUP`.
 The Playwright MCP server config is generated for both tools during setup.
 
-Manual alternative: copy `QAnyone/`, `CLAUDE.md` and `.github/copilot-instructions.md` into the repo.
+If the repo already has a `CLAUDE.md` or `.github/copilot-instructions.md`, they are kept: the installer
+appends a marked QAnyone block (`<!-- qanyone:start -->` … `<!-- qanyone:end -->`) and later updates
+replace only that block.
+
+Manual alternative: copy `QAnyone/` into the repo and paste the contents of the package's `CLAUDE.md`
+into your own `CLAUDE.md` / `.github/copilot-instructions.md`.
+
+**Update an existing project:** `npx github:trongld230289/QAnyone update` then type `UPDATE`
+in the chat — the AI syncs the generated config/helpers with the new templates and keeps your
+values, locators and tests.
 
 ## Commands
 | Command | What it does |
@@ -29,6 +38,7 @@ Manual alternative: copy `QAnyone/`, `CLAUDE.md` and `.github/copilot-instructio
 | `RERUN TC <id>` | Re-run one test (regenerates the spec if its test case file changed) |
 | `STATUS` | Phase, auth state, test cases and page-object registry |
 | `PUSH ADO <id>` | Create or update the test case in Azure DevOps after a preview |
+| `UPDATE` | After `npx … update`: sync generated files with the new framework templates |
 
 ## How a test case flows
 ```

@@ -17,7 +17,7 @@ const REQUIRED = [
   "QAnyone/templates/scripts/fetch-tc.ts", "QAnyone/templates/scripts/ado-writer.ts",
 ];
 const BUDGET = {
-  "QAnyone/core.md": 11000, "QAnyone/setup.md": 9000, "QAnyone/pipeline.md": 17000,
+  "QAnyone/core.md": 11000, "QAnyone/setup.md": 10000, "QAnyone/pipeline.md": 17000,
   "QAnyone/formats.md": 9000, "QAnyone/rules.md": 9000,
 };
 const TOTAL_BUDGET = 55000;

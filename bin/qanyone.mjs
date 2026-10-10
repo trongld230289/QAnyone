@@ -1,41 +1,84 @@
 #!/usr/bin/env node
-// QAnyone installer: `npx github:trongld230289/QAnyone init [dir] [--force]`
-import { cpSync, existsSync, mkdirSync } from "node:fs";
+// QAnyone installer:
+//   npx github:trongld230289/QAnyone init   [dir] [--force]   first install
+//   npx github:trongld230289/QAnyone update [dir]             refresh framework files
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const ITEMS = ["QAnyone", "CLAUDE.md", ".github/copilot-instructions.md"];
+// Instruction files are merged: an existing CLAUDE.md / copilot-instructions.md keeps its
+// own content and gets the QAnyone block between markers; update replaces only that block.
+const POINTERS = ["CLAUDE.md", ".github/copilot-instructions.md"];
+const START = "<!-- qanyone:start -->";
+const END = "<!-- qanyone:end -->";
 const USAGE = `usage: qanyone init [dir] [--force]
-  Copies the QAnyone framework (QAnyone/, CLAUDE.md, .github/copilot-instructions.md)
-  into <dir> (default: current directory). --force overwrites an existing QAnyone/.`;
+       qanyone update [dir]
+  init    copies QAnyone/ into <dir> (default: current directory) and adds the QAnyone block
+          to CLAUDE.md and .github/copilot-instructions.md (existing content is kept).
+          --force overwrites an existing QAnyone/.
+  update  overwrites QAnyone/ and refreshes the QAnyone block in the instruction files, then
+          tells you to type UPDATE in the chat so the AI syncs the generated files.`;
 
 const args = process.argv.slice(2);
 const cmd = args[0];
 const force = args.includes("--force");
 const target = resolve(args.slice(1).find((a) => !a.startsWith("--")) ?? process.cwd());
 
-if (cmd !== "init") {
+if (cmd !== "init" && cmd !== "update") {
   console.error(USAGE);
   process.exit(cmd === "--help" || cmd === "-h" ? 0 : 2);
 }
 
-if (existsSync(join(target, "QAnyone")) && !force) {
-  console.error(`QAnyone/ already exists in ${target}. Re-run with --force to overwrite the framework files.`);
+const installed = existsSync(join(target, "QAnyone"));
+if (cmd === "init" && installed && !force) {
+  console.error(`QAnyone/ already exists in ${target}. Use "update" to refresh it, or "init --force" to overwrite.`);
+  process.exit(1);
+}
+if (cmd === "update" && !installed) {
+  console.error(`No QAnyone/ in ${target}. Run "init" first.`);
   process.exit(1);
 }
 
 mkdirSync(target, { recursive: true });
-for (const item of ITEMS) {
-  const src = join(PKG_ROOT, item);
-  const dst = join(target, item);
+cpSync(join(PKG_ROOT, "QAnyone"), join(target, "QAnyone"), { recursive: true, force: true });
+
+function mergePointer(rel) {
+  const block = `${START}\n${readFileSync(join(PKG_ROOT, rel), "utf8").trim()}\n${END}\n`;
+  const dst = join(target, rel);
   mkdirSync(dirname(dst), { recursive: true });
-  cpSync(src, dst, { recursive: true, force: true });
+  if (!existsSync(dst)) {
+    writeFileSync(dst, block);
+    return "created";
+  }
+  const current = readFileSync(dst, "utf8");
+  const s = current.indexOf(START);
+  const e = current.indexOf(END);
+  if (s >= 0 && e > s) {
+    writeFileSync(dst, current.slice(0, s) + block.trimEnd() + current.slice(e + END.length));
+    return "block refreshed";
+  }
+  writeFileSync(dst, current.trimEnd() + "\n\n" + block);
+  return "block appended to your existing file";
 }
 
-console.log(`QAnyone installed in ${target}
+const notes = POINTERS.map((p) => `  ${p}: ${mergePointer(p)}`).join("\n");
+
+if (cmd === "update") {
+  console.log(`QAnyone framework files refreshed in ${target}
+${notes}
+
+Next:
+  1. Open this folder in GitHub Copilot Chat (Agent mode) or Claude Code.
+  2. Type: UPDATE   (the AI syncs playwright.config.ts, .env.example, helpers and scripts
+                     with the new templates, keeping your values and locators)
+`);
+} else {
+  console.log(`QAnyone installed in ${target}
+${notes}
 
 Next:
   1. Open this folder in GitHub Copilot Chat (Agent mode) or Claude Code.
   2. Type: SETUP
 `);
+}

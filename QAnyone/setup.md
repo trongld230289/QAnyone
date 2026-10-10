@@ -96,6 +96,25 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
 4. auth ≠ none and storage state missing or older than 7 days → run A.5c–d.
 5. `phase: ready`; report as in A.7.
 
+## C. UPDATE (after `npx github:trongld230289/QAnyone update`)
+The framework files are already new; sync the generated files with `QAnyone/templates/`
+without losing anything the user or the pipeline wrote. `T` = `QAnyone/templates/`.
+1. Overwrite as-is (never hand-edited): `pages/base.page.ts`, `pages/page.template.ts`,
+   `helpers/env.ts`, `helpers/totp.ts`, `scripts/*.ts` (only if present), `.mcp.json`,
+   `.vscode/mcp.json`; `.gitignore` → add missing template lines, keep extras.
+2. Merge (keep user values): `.env.example` — add keys that the template has and the file
+   lacks, with the template defaults; never remove keys. Then say which keys are new so the
+   user can copy them into `.env` (never open `.env`).
+3. Merge (keep project choices): `playwright.config.ts` — READ both, replace the `use` block
+   and the `flag(...)`/`STORAGE` helpers with the template's, keep `projects`, `testDir`,
+   reporters and any extra options the project added. `tests/auth.setup.ts` — replace the
+   template-origin lines (storage path, URL check), keep any app-specific `expect` the project
+   added. `pages/login.page.ts` and `fixtures/pages.fixture.ts` — do not touch (they hold
+   discovered locators and registered pages).
+4. RUN `npx tsc -p tsconfig.json`; fix. RUN `npx playwright test --project=setup` when
+   `auth ≠ none` to confirm login still works.
+5. Report the files changed and the new `.env` keys (names only).
+
 ## Resume
 `current_tc` set → READ `pipeline.md`, continue at `current_step`.
 `phase: setup` → continue at the first A/B step whose output is missing.
