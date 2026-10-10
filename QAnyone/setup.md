@@ -17,13 +17,12 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    - WRITE `playwright.config.ts` from `T/playwright.config.ts`; uncomment the firefox/webkit
      projects listed in `browsers`.
    - WRITE `tsconfig.json`: `{ "compilerOptions": { "target": "ES2022", "module": "ESNext",
-     "moduleResolution": "Bundler", "strict": true, "noEmit": true, "skipLibCheck": true, "types": ["node"] } }`
+     "moduleResolution": "Bundler", "strict": true, "noEmit": true, "skipLibCheck": true,
+     "types": ["node"] }, "exclude": ["node_modules", "QAnyone"] }` (templates must not be compiled in place).
    - Copy `T/base.page.ts → pages/`, `T/page.template.ts → pages/` (kept as the pattern for
-     new pages), `T/pages.fixture.ts → fixtures/`, `T/env.ts → helpers/`,
-     `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`, `T/mcp.json → .mcp.json`,
-     `T/vscode-mcp.json → .vscode/mcp.json`.
-   - `two_fa: totp` → copy `T/totp.ts → helpers/`. (auth.setup.ts imports it: when not
-     copied, remove that import and the TOTP line from `tests/auth.setup.ts`.)
+     new pages), `T/pages.fixture.ts → fixtures/`, `T/env.ts → helpers/`, `T/totp.ts → helpers/`
+     (always; auth.setup.ts imports it), `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`,
+     `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`.
    - `auth` ≠ none → copy `T/login.<auth>.page.ts → pages/login.page.ts`
      (`form`, `azure-ad`, `google`; `okta-auth0` / `other` start from `login.form.page.ts`).
      `auth: none` → copy `T/login.form.page.ts` unchanged (auth.setup.ts imports it but skips login).
