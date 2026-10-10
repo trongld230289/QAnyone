@@ -8,5 +8,6 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["QAnyone/templates/**/*.ts", "tools/**/*.ts"]
+  "include": ["QAnyone/templates/**/*.ts", "tools/**/*.ts"],
+  "exclude": ["QAnyone/templates/auth.setup.ts", "QAnyone/templates/pages.fixture.ts"]
 }
