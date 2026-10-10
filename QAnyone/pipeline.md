@@ -64,7 +64,7 @@ import { test, expect } from "../../fixtures/pages.fixture";
 const data = { keyword: "QA" }; // from Test Data
 
 test.describe("102874 Search job by keyword", { tag: ["@regression"] }, () => {
-  test("102874", async ({ page, jobsPage }) => {
+  test("102874 Search job by keyword", async ({ page, jobsPage }) => {
     await test.step("1. [Pre] Logged in, on home page", async () => {
       await page.goto("/");
     });
@@ -81,7 +81,7 @@ test.describe("102874 Search job by keyword", { tag: ["@regression"] }, () => {
   });
 });
 ```
-One `test.step` per TC row, same numbering and text. Every non-empty Expected → `expect()`.
+`describe` and `test` titles are both `<id> <title>`. One `test.step` per TC row, same numbering and text. Every non-empty Expected → `expect()`.
 EDIT the TC frontmatter `spec:`. RUN `npx tsc -p tsconfig.json`; fix type errors.
 
 ### 7. Run + self-heal
