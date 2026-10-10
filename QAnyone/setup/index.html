@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QAnyone Setup</title>
+<style>
+  :root { --bg:#fff; --fg:#1a1a1a; --muted:#666; --line:#ddd; --accent:#2563eb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111; --fg:#eee; --muted:#aaa; --line:#333; } }
+  body { margin:0; padding:24px 16px; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin: 0 0 16px; }
+  legend { font-weight: 600; padding: 0 6px; }
+  label { display: block; margin: 4px 0; }
+  input[type=text], textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); font: inherit; }
+  label > input[type=text] { width: auto; min-width: 200px; margin-left: 6px; }
+  .hint { color: var(--muted); font-size: 13px; }
+  button { padding: 8px 14px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; font: inherit; }
+  button.secondary { background: transparent; color: var(--accent); }
+  .qa { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin: 6px 0; }
+  #output { min-height: 260px; font-family: ui-monospace, monospace; font-size: 13px; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+<h1>QAnyone — project setup</h1>
+<p class="lead">Answer what applies, click <b>Generate</b>, copy the result and paste it into the chat. No secrets here — you will fill <code>.env</code> later.</p>
+
+<fieldset><legend>1. Base URL</legend>
+  <input type="text" id="base_url" placeholder="https://app.example.com">
+</fieldset>
+
+<fieldset><legend>2. Does the app require login?</legend>
+  <label><input type="radio" name="auth" value="none"> No — public web</label>
+  <label><input type="radio" name="auth" value="form"> Yes — standard login form (email / password)</label>
+  <label><input type="radio" name="auth" value="azure-ad"> Yes — Azure AD / Entra ID</label>
+  <label><input type="radio" name="auth" value="google"> Yes — Google</label>
+  <label><input type="radio" name="auth" value="okta-auth0"> Yes — Okta / Auth0</label>
+  <label><input type="radio" name="auth" value="other"> Yes — other: <input type="text" id="auth_other" placeholder="describe"></label>
+</fieldset>
+
+<fieldset id="q-two-fa" class="hidden"><legend>3. Two-factor authentication</legend>
+  <label><input type="radio" name="two_fa" value="none"> None</label>
+  <label><input type="radio" name="two_fa" value="totp"> TOTP (authenticator app)</label>
+  <label><input type="radio" name="two_fa" value="sms"> SMS code</label>
+  <label><input type="radio" name="two_fa" value="push"> Push notification</label>
+  <label><input type="radio" name="two_fa" value="unknown"> Has 2FA, type unknown</label>
+</fieldset>
+
+<fieldset id="q-totp" class="hidden"><legend>4. Do you have the TOTP secret key?</legend>
+  <label><input type="radio" name="totp_secret_available" value="true"> Yes — I will put it in .env</label>
+  <label><input type="radio" name="totp_secret_available" value="false"> Not yet</label>
+</fieldset>
+
+<fieldset><legend>5. Where do test cases come from? (choose all that apply)</legend>
+  <label><input type="checkbox" name="sources" value="ado"> Azure DevOps work items</label>
+  <label><input type="checkbox" name="sources" value="md"> Markdown files I already have</label>
+  <label><input type="checkbox" name="sources" value="codegen"> Record flows with Playwright codegen</label>
+</fieldset>
+
+<fieldset id="q-ado" class="hidden"><legend>6. Azure DevOps</legend>
+  <label>Organization URL <input type="text" id="ado_org" placeholder="https://dev.azure.com/my-org"></label>
+  <label>Project name <input type="text" id="ado_project" placeholder="My Project"></label>
+  <p class="hint">The PAT goes into .env later, not here.</p>
+</fieldset>
+
+<fieldset><legend>7. Browsers</legend>
+  <label><input type="checkbox" name="browsers" value="chromium" checked> Chromium (default)</label>
+  <label><input type="checkbox" name="browsers" value="firefox"> Firefox</label>
+  <label><input type="checkbox" name="browsers" value="webkit"> WebKit</label>
+</fieldset>
+
+<fieldset><legend>8. Test data</legend>
+  <label><input type="radio" name="test_data" value="existing"> App already has data — tests use it</label>
+  <label><input type="radio" name="test_data" value="self-create-cleanup"> Tests create their own data and clean up</label>
+  <label><input type="radio" name="test_data" value="seed"> Data must be seeded before runs</label>
+  <label><input type="radio" name="test_data" value="unknown"> Don't know yet</label>
+</fieldset>
+
+<fieldset><legend>9. Language for test case text and reports</legend>
+  <label><input type="radio" name="language" value="en" checked> English</label>
+  <label><input type="radio" name="language" value="vi"> Tiếng Việt</label>
+</fieldset>
+
+<fieldset><legend>10. Anything special about the app? (optional)</legend>
+  <textarea id="notes" rows="3" placeholder="SPA, iframes, shadow DOM, slow loading, popups, date pickers…"></textarea>
+</fieldset>
+
+<fieldset><legend>Your own questions (optional)</legend>
+  <div id="qa-list"></div>
+  <button type="button" class="secondary" id="add-qa">+ Add question</button>
+</fieldset>
+
+<p><button type="button" id="generate">Generate</button> <button type="button" class="secondary" id="copy">Copy</button> <span id="copied" class="hint"></span></p>
+<textarea id="output" readonly placeholder="qanyone.config.md will appear here"></textarea>
+<p class="hint">Next: paste into the chat. The AI writes <code>qanyone.config.md</code> and continues SETUP.</p>
+</main>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const radio = (n) => (document.querySelector("input[name=" + n + "]:checked") || {}).value || "";
+  const checks = (n) => $$("input[name=" + n + "]:checked").map((i) => i.value);
+
+  function refresh() {
+    const auth = radio("auth");
+    const needsAuth = auth !== "" && auth !== "none";
+    $("#q-two-fa").classList.toggle("hidden", !needsAuth);
+    $("#q-totp").classList.toggle("hidden", !(needsAuth && radio("two_fa") === "totp"));
+    $("#q-ado").classList.toggle("hidden", !checks("sources").includes("ado"));
+  }
+  document.addEventListener("change", refresh);
+
+  $("#add-qa").addEventListener("click", () => {
+    const row = document.createElement("div");
+    row.className = "qa";
+    row.innerHTML = '<input type="text" class="qa-q" placeholder="Question"><input type="text" class="qa-a" placeholder="Answer"><button type="button" class="secondary qa-x" title="Remove">×</button>';
+    row.querySelector(".qa-x").addEventListener("click", () => row.remove());
+    $("#qa-list").appendChild(row);
+  });
+
+  const yq = (v) => JSON.stringify(String(v));   // YAML double-quoted scalar (JSON escaping is valid YAML)
+  const list = (a) => "[" + a.join(", ") + "]";
+
+  function generate() {
+    const auth = radio("auth") || "none";
+    const sources = checks("sources");
+    const browsers = checks("browsers").length ? checks("browsers") : ["chromium"];
+    const lines = ["---", "base_url: " + yq($("#base_url").value.trim()), "auth: " + auth];
+    if (auth === "other") lines.push("auth_other: " + yq($("#auth_other").value.trim()));
+    if (auth !== "none") {
+      const tf = radio("two_fa") || "none";
+      lines.push("two_fa: " + tf);
+      if (tf === "totp") lines.push("totp_secret_available: " + (radio("totp_secret_available") === "true"));
+    }
+    lines.push("sources: " + list(sources));
+    if (sources.includes("ado")) {
+      lines.push("ado_org: " + yq($("#ado_org").value.trim()));
+      lines.push("ado_project: " + yq($("#ado_project").value.trim()));
+    }
+    lines.push("browsers: " + list(browsers));
+    lines.push("test_data: " + (radio("test_data") || "unknown"));
+    lines.push("language: " + (radio("language") || "en"));
+    lines.push("---", "## Notes");
+    const notes = $("#notes").value.trim();
+    if (notes) lines.push(notes, "");
+    $$(".qa").forEach((r) => {
+      const q = r.querySelector(".qa-q").value.trim();
+      const a = r.querySelector(".qa-a").value.trim();
+      if (q || a) lines.push("**" + q + "** " + a, "");
+    });
+    $("#output").value = lines.join("\n").trimEnd() + "\n";
+  }
+  $("#generate").addEventListener("click", generate);
+  $("#copy").addEventListener("click", async () => {
+    if (!$("#output").value) generate();
+    try {
+      await navigator.clipboard.writeText($("#output").value);
+      $("#copied").textContent = "Copied.";
+    } catch (e) {
+      $("#output").select();
+      $("#copied").textContent = "Select-all and copy manually.";
+    }
+  });
+
+  // Prefill from the query string (SETUP uses this on existing repos). Secrets never travel here.
+  const p = new URLSearchParams(location.search);
+  const setRadio = (n, v) => { const el = document.querySelector('input[name=' + n + '][value="' + v + '"]'); if (el) el.checked = true; };
+  const setChecks = (n, csv) => { $$("input[name=" + n + "]").forEach((i) => { i.checked = false; }); csv.split(",").forEach((v) => setRadio(n, v.trim())); };
+  if (p.get("baseUrl")) $("#base_url").value = p.get("baseUrl");
+  if (p.get("auth")) setRadio("auth", p.get("auth"));
+  if (p.get("twoFa")) setRadio("two_fa", p.get("twoFa"));
+  if (p.get("sources")) setChecks("sources", p.get("sources"));
+  if (p.get("adoOrg")) $("#ado_org").value = p.get("adoOrg");
+  if (p.get("adoProject")) $("#ado_project").value = p.get("adoProject");
+  if (p.get("browsers")) setChecks("browsers", p.get("browsers"));
+  if (p.get("testData")) setRadio("test_data", p.get("testData"));
+  if (p.get("language")) setRadio("language", p.get("language"));
+  refresh();
+})();
+</script>
+</body>
+</html>
