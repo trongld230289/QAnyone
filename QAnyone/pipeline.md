@@ -3,6 +3,8 @@
 Read `rules.md` before step 5 and `formats.md` before step 2. After every step: EDIT
 `QANYONE_STATE.md` (`current_tc`, `current_step`). A new chat continues from `current_step`
 without repeating earlier questions. Several ids → run the whole pipeline per id, in order.
+NEW TC / RERUN TC start with TASKS: list the steps you will run (per test case when there are
+several) and keep the list current as each step starts and ends.
 
 ## NEW TC
 ### 0. Precheck (silent)
@@ -32,10 +34,10 @@ exists in `test-cases/` is a collision → take the next free number and say so)
 path or the page named in step 1), tags, `status: draft`. Rewrite steps with the fixed verbs,
 quoted element names, `{{key}}` data, `[Pre]` first row; move repeated literals into Test Data.
 Text language per state `language`.
-CONFIRM (sources `md` and `codegen` only; ADO skips it): print the Steps and Test Data tables
-of every file just written in the message, then ASK "Confirm these steps?" with the options
-`OK` / `I edited the file(s), re-read them`. Repeat until OK. Then `status: confirmed`
-(ADO source: set `confirmed` directly).
+Print the Steps and Test Data tables of every file just written in the message (every source).
+CONFIRM (sources `md` and `codegen` only): then ASK "Confirm these steps?" with the options
+`OK` / `I edited the file(s), re-read them`. Repeat until OK. Then `status: confirmed`.
+ADO source: no ASK; set `confirmed` directly and continue.
 
 ### 3. Map
 READ `pom-registry/INDEX.md`, the `<feature>.md` of the TC, and `_shared.md` when the steps
