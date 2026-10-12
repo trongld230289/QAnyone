@@ -15,7 +15,8 @@ npx github:trongld230289/QAnyone init
 ```
 
 Then open the folder in Copilot Chat (Agent mode) or Claude Code and type `SETUP`.
-The Playwright MCP server config is generated for both tools during setup.
+The installer also writes the Playwright MCP config for both tools, the approval settings and an
+empty storage state, so the browser tools are available from the first chat with no restart.
 
 If the repo already has a `CLAUDE.md` or `.github/copilot-instructions.md`, they are kept: the installer
 appends a marked QAnyone block (`<!-- qanyone:start -->` … `<!-- qanyone:end -->`) and later updates

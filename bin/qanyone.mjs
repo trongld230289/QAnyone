@@ -73,7 +73,26 @@ function looksLikeQAnyoneOnly(text) {
   return t.startsWith("# QAnyone") && t.includes("READ `QAnyone/core.md`") && t.split("\n").length <= 15;
 }
 
-const notes = POINTERS.map((p) => `  ${p}: ${mergePointer(p)}`).join("\n");
+// Files the IDE must see before the first chat (MCP server config, approvals, an empty storage
+// state so the MCP server can start). Created when missing, never overwritten: the chat UPDATE
+// command merges changes into them.
+const SEED = [
+  [".mcp.json", "QAnyone/templates/mcp.json"],
+  [".vscode/mcp.json", "QAnyone/templates/vscode-mcp.json"],
+  ["playwright-mcp.json", "QAnyone/templates/playwright-mcp.json"],
+  [".claude/settings.json", "QAnyone/templates/claude-settings.json"],
+  [".vscode/settings.json", "QAnyone/templates/vscode-settings.json"],
+  ["playwright/.auth/user.json", null],
+];
+function seed([rel, src]) {
+  const dst = join(target, rel);
+  if (existsSync(dst)) return `  ${rel}: kept`;
+  mkdirSync(dirname(dst), { recursive: true });
+  writeFileSync(dst, src ? readFileSync(join(PKG_ROOT, src), "utf8") : '{"cookies":[],"origins":[]}\n');
+  return `  ${rel}: created`;
+}
+
+const notes = [...POINTERS.map((p) => `  ${p}: ${mergePointer(p)}`), ...SEED.map(seed)].join("\n");
 
 if (cmd === "update") {
   console.log(`QAnyone updated in ${target}

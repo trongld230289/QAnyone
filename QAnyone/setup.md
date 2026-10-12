@@ -22,11 +22,12 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      "types": ["node"] }, "exclude": ["node_modules", "QAnyone"] }` (templates must not be compiled in place).
    - Copy `T/base.page.ts → pages/`, `T/page.template.ts → pages/` (kept as the pattern for
      new pages), `T/pages.fixture.ts → fixtures/`, `T/env.ts → helpers/`, `T/totp.ts → helpers/`
-     (always; auth.setup.ts imports it), `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`,
-     `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`, `T/playwright-mcp.json → playwright-mcp.json`.
-   - IDE approvals, so the pipeline runs without a prompt per step: `T/claude-settings.json →
-     .claude/settings.json`, `T/vscode-settings.json → .vscode/settings.json`. If the file
-     exists, add only the keys it lacks (it is the user's file).
+     (always; auth.setup.ts imports it), `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`.
+   - Normally already created by the installer, so the IDE had them before this chat — copy only
+     when missing: `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`,
+     `T/playwright-mcp.json → playwright-mcp.json`, and the approvals `T/claude-settings.json →
+     .claude/settings.json`, `T/vscode-settings.json → .vscode/settings.json` (exists → add only
+     the keys it lacks; it is the user's file).
    - `auth` ≠ none → copy `T/login.<auth>.page.ts → pages/login.page.ts`
      (`form`, `azure-ad`, `google`; `okta-auth0` / `other` start from `login.form.page.ts`).
      `auth: none` → copy `T/login.form.page.ts` unchanged (auth.setup.ts imports it but skips login).
@@ -38,10 +39,11 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      `true` iff auth ≠ none. Then WRITE `.env` with the same content (secret values left
      empty) unless `.env` already exists. After this write, never read `.env` again.
    - WRITE `pom-registry/INDEX.md` (table header only), `pom-registry/_shared.md` (empty
-     heading), `test-cases/.gitkeep`, and `playwright/.auth/user.json` containing
+     heading), `test-cases/.gitkeep`, and (if missing) `playwright/.auth/user.json` containing
      `{"cookies":[],"origins":[]}` so the MCP server can start before auth exists.
-   - Say: "MCP config written — restart Copilot Chat / Claude Code (or reload the MCP server)
-     so the Playwright browser tools are available." Continue with step 4 after that.
+   - Only if the BROWSER tools are not available in this chat (the MCP config was created just
+     now): say "Restart Copilot Chat / Claude Code once so the Playwright browser tools load",
+     then continue with step 4.
    - WRITE `QANYONE_STATE.md` (formats.md §3): `phase: setup`, `auth`, `sources`, `browsers`,
      `language` from config, `auth_ready: false`, `ado_configured: false`.
 4. If auth ≠ none or sources has ado: say "Open `.env` and fill in <the empty keys, by
@@ -75,10 +77,11 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
       locator / route (max 3 rounds, rules.md Self-heal). CAPTCHA, unsupported MFA, wrong
       credentials → BLOCKING.
    d. Verify `playwright/.auth/user.json` exists and is larger than 100 bytes. EDIT state:
-      `auth_ready: true`, `auth_updated: <today>`. Say: "Restart the Playwright MCP server so it
-      picks up the storage state." Optional, after the restart: `browser_navigate` to
-      `base_url` (now logged in), pick one element that only exists after login, and add an
-      `expect` on it to `tests/auth.setup.ts` as a stronger check.
+      `auth_ready: true`, `auth_updated: <today>`. Load the session into the MCP browser without
+      a restart: `browser_set_storage_state` with `filename: playwright/.auth/user.json` (tool
+      missing → `browser_close`, the next `browser_navigate` starts a session from that file).
+      Optional: `browser_navigate` to `base_url` (now logged in), pick one element that only
+      exists after login, and add an `expect` on it to `tests/auth.setup.ts` as a stronger check.
 6. auth = none: RUN `npx playwright test --project=setup` (writes an empty storage state),
    then BROWSER `browser_navigate` to `base_url` and confirm the page title is non-empty.
    BROWSER unavailable → say which MCP config to enable; this is not blocking for SETUP.

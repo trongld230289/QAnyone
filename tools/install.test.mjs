@@ -98,3 +98,21 @@ test("update replaces a marker-less CLAUDE.md written by an older installer inst
   assert.match(kept, /^# My notes\n\nkeep me\n\n<!-- qanyone:start -->/);
   rmSync(dir, { recursive: true, force: true });
 });
+
+test("init seeds MCP config, approvals and an empty storage state; update keeps them", () => {
+  const dir = mkdtempSync(join(tmpdir(), "qanyone-seed-"));
+  const r = run("init", dir);
+  assert.equal(r.status, 0, r.stderr);
+  for (const f of [".mcp.json", ".vscode/mcp.json", "playwright-mcp.json", ".claude/settings.json", ".vscode/settings.json", "playwright/.auth/user.json"]) {
+    assert.ok(existsSync(join(dir, f)), `missing ${f}`);
+    assert.match(r.stdout, new RegExp(`${f.replace(/[.\/]/g, "\$&")}: created`));
+  }
+  assert.deepEqual(JSON.parse(readFileSync(join(dir, "playwright/.auth/user.json"), "utf8")), { cookies: [], origins: [] });
+  const { writeFileSync } = require("node:fs");
+  writeFileSync(join(dir, ".mcp.json"), "{\"mine\":true}");
+  const u = run("update", dir);
+  assert.equal(u.status, 0, u.stderr);
+  assert.equal(readFileSync(join(dir, ".mcp.json"), "utf8"), "{\"mine\":true}", "update must not overwrite user files");
+  assert.match(u.stdout, /\.mcp\.json: kept/);
+  rmSync(dir, { recursive: true, force: true });
+});
