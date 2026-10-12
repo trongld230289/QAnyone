@@ -3,10 +3,11 @@
 Read `rules.md` before step 5 and `formats.md` before step 2. After every step: EDIT
 `QANYONE_STATE.md` (`current_tc`, `current_step`). A new chat continues from `current_step`
 without repeating earlier questions. Several ids → run the whole pipeline per id, in order.
-TASKS before the first step: exactly one item per step that will run, titled `1 Intake`,
-`2 Normalize`, `3 Map`, `4 Discover`, `5 POM`, `6 Spec`, `7 Run + self-heal`, `8 Memory`,
-`9 Report` (RERUN TC or resume: only the steps left). The test case's own steps are never
-tasks. Several test cases → prefix each title with the test case id and rewrite the list when
+TASKS is the first tool call of NEW TC and RERUN TC, before any RUN, WRITE or BROWSER: it replaces
+any earlier list with exactly one item per step that will run, titled `1 Intake`, `2 Normalize`,
+`3 Map`, `4 Discover`, `5 POM`, `6 Spec`, `7 Run + self-heal`, `8 Memory`, `9 Report` (RERUN TC
+or resume: only the steps left). Never add, rename or drop items: the test case's own steps are
+not tasks. Several test cases → prefix each title with the test case id and rewrite the list when
 the next one starts. Mark an item in progress when its step starts, completed when it ends.
 
 ## NEW TC
@@ -37,7 +38,8 @@ exists in `test-cases/` is a collision → take the next free number and say so)
 path or the page named in step 1), tags, `status: draft`. Rewrite steps with the fixed verbs,
 quoted element names, `{{key}}` data, `[Pre]` first row; move repeated literals into Test Data.
 Text language per state `language`.
-Print the Steps and Test Data tables of every file just written in the message (every source).
+Right after writing, send a chat message with the Steps and Test Data tables of every file just
+written (every source), before any tool call of step 3: this is where the user reads the test case.
 CONFIRM (sources `md` and `codegen` only): then ASK "Confirm these steps?" with the options
 `OK` / `I edited the file(s), re-read them`. Repeat until OK. Then `status: confirmed`.
 ADO source: no ASK; set `confirmed` directly and continue.
