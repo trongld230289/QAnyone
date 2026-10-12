@@ -13,7 +13,7 @@ const REQUIRED = [
   "QAnyone/templates/login.form.page.ts", "QAnyone/templates/login.azure-ad.page.ts", "QAnyone/templates/login.google.page.ts",
   "QAnyone/templates/pages.fixture.ts", "QAnyone/templates/env.ts", "QAnyone/templates/totp.ts",
   "QAnyone/templates/env.example", "QAnyone/templates/gitignore",
-  "QAnyone/templates/mcp.json", "QAnyone/templates/vscode-mcp.json",
+  "QAnyone/templates/mcp.json", "QAnyone/templates/vscode-mcp.json", "QAnyone/templates/playwright-mcp.json",
   "QAnyone/templates/scripts/fetch-tc.ts", "QAnyone/templates/scripts/ado-writer.ts",
 ];
 const BUDGET = {

@@ -10,6 +10,14 @@ const headless = flag("HEADLESS", "true") !== "false";
 const trace = flag("TRACE", "retain-on-failure") as "on" | "off" | "retain-on-failure" | "on-first-retry";
 const video = flag("VIDEO", "retain-on-failure") as "on" | "off" | "retain-on-failure";
 const screenshot = flag("SCREENSHOT", "only-on-failure") as "on" | "off" | "only-on-failure";
+// VIEWPORT: "<width>x<height>" (default 1280x720) or "max" = window maximised, page fills it
+// (headed Chromium only; headless has no window, so "max" falls back to 1280x720).
+// Spread `...win` after `devices[...]` so it wins over the device size.
+const viewport = flag("VIEWPORT", "1280x720");
+const size = /^(\d+)x(\d+)$/.exec(viewport);
+const win = viewport === "max" && !headless
+  ? { viewport: null, deviceScaleFactor: undefined, launchOptions: { args: ["--start-maximized"] } }
+  : { viewport: { width: Number(size?.[1] ?? 1280), height: Number(size?.[2] ?? 720) } };
 
 export default defineConfig({
   testDir: "./tests",
@@ -22,16 +30,17 @@ export default defineConfig({
     trace,
     video,
     screenshot,
+    ...win,
   },
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"], storageState: authRequired ? STORAGE : undefined },
+      use: { ...devices["Desktop Chrome"], ...win, storageState: authRequired ? STORAGE : undefined },
       dependencies: ["setup"],
     },
     // SETUP uncomments these when the config lists the browser:
-    // { name: "firefox", use: { ...devices["Desktop Firefox"], storageState: authRequired ? STORAGE : undefined }, dependencies: ["setup"] },
-    // { name: "webkit",  use: { ...devices["Desktop Safari"],  storageState: authRequired ? STORAGE : undefined }, dependencies: ["setup"] },
+    // { name: "firefox", use: { ...devices["Desktop Firefox"], ...win, storageState: authRequired ? STORAGE : undefined }, dependencies: ["setup"] },
+    // { name: "webkit",  use: { ...devices["Desktop Safari"],  ...win, storageState: authRequired ? STORAGE : undefined }, dependencies: ["setup"] },
   ],
 });

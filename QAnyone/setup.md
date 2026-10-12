@@ -23,14 +23,14 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    - Copy `T/base.page.ts → pages/`, `T/page.template.ts → pages/` (kept as the pattern for
      new pages), `T/pages.fixture.ts → fixtures/`, `T/env.ts → helpers/`, `T/totp.ts → helpers/`
      (always; auth.setup.ts imports it), `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`,
-     `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`.
+     `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`, `T/playwright-mcp.json → playwright-mcp.json`.
    - `auth` ≠ none → copy `T/login.<auth>.page.ts → pages/login.page.ts`
      (`form`, `azure-ad`, `google`; `okta-auth0` / `other` start from `login.form.page.ts`).
      `auth: none` → copy `T/login.form.page.ts` unchanged (auth.setup.ts imports it but skips login).
    - `sources` has `ado` → copy `T/scripts/fetch-tc.ts` and `T/scripts/ado-writer.ts → scripts/`.
    - WRITE `.env.example` from `T/env.example`, keeping only the keys this config needs
-     (`BASE_URL`, `AUTH_REQUIRED` and the four run flags `HEADLESS`, `TRACE`, `VIDEO`,
-     `SCREENSHOT` always, with their defaults; login keys when auth ≠ none; `TOTP_SECRET` when
+     (`BASE_URL`, `AUTH_REQUIRED` and the run flags `HEADLESS`, `TRACE`, `VIDEO`,
+     `SCREENSHOT`, `VIEWPORT` always, with their defaults; login keys when auth ≠ none; `TOTP_SECRET` when
      totp; ADO keys when sources has ado). Prefill `BASE_URL` with `base_url`; `AUTH_REQUIRED` is
      `true` iff auth ≠ none. Then WRITE `.env` with the same content (secret values left
      empty) unless `.env` already exists. After this write, never read `.env` again.
@@ -107,13 +107,13 @@ The framework files are already new; sync the generated files with `QAnyone/temp
 without losing anything the user or the pipeline wrote. `T` = `QAnyone/templates/`.
 1. Overwrite as-is (never hand-edited): `pages/base.page.ts`, `pages/page.template.ts`,
    `helpers/env.ts`, `helpers/totp.ts`, `scripts/*.ts` (only if present), `.mcp.json`,
-   `.vscode/mcp.json`; `.gitignore` → add missing template lines, keep extras.
+   `.vscode/mcp.json`, `playwright-mcp.json`; `.gitignore` → add missing template lines, keep extras.
 2. Merge (keep user values): `.env.example` — add keys that the template has and the file
    lacks, with the template defaults; never remove keys. Then say which keys are new so the
    user can copy them into `.env` (never open `.env`).
 3. Merge (keep project choices): `playwright.config.ts` — READ both, replace the `use` block
-   and the `flag(...)`/`STORAGE` helpers with the template's, keep `projects`, `testDir`,
-   reporters and any extra options the project added. `tests/auth.setup.ts` — replace the
+   and everything above `defineConfig` with the template's, add `...win` after each
+   `devices[...]` spread; keep `projects`, `testDir`, reporters and extra options the project added. `tests/auth.setup.ts` — replace the
    template-origin lines (storage path, URL check), keep any app-specific `expect` the project
    added. `pages/login.page.ts` and `fixtures/pages.fixture.ts` — do not touch (they hold
    discovered locators and registered pages).
