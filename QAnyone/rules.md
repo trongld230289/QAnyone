@@ -4,6 +4,9 @@
 - Never guess. Allowed sources, cheapest first: `pom-registry` → TC `Locators` table →
   BROWSER (`browser_snapshot` on the page, then `browser_generate_locator` for the element;
   if that tool is missing, derive from the snapshot's role + name).
+- Keep snapshots small: perform the preceding steps first so only the relevant screen is
+  captured; pass `depth` (6–8) or `filename` and SEARCH the saved file for the role / name,
+  instead of pulling a whole 30 KB page into the chat. One snapshot per screen, not per element.
 - Tag every locator: `[FROM MCP]` `[FROM CODEGEN]` `[FROM USER]` `[FROM TEMPLATE]`.
 - Priority: `getByRole` > `getByLabel` > `getByPlaceholder` > `getByText` > `getByTestId` > CSS.
   CSS only when BROWSER confirms nothing else is unique.

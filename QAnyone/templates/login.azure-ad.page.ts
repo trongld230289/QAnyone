@@ -28,8 +28,21 @@ export class LoginPage extends BasePage {
   }
 
   async login(username: string, password: string): Promise<void> {
-    await this.username.fill(username);
-    await this.next.click();
+    // SSO tenants may skip the username step: the account picker ("Pick an account") or the
+    // password page can come first, and a device already signed in lands straight in the app.
+    const show = (l: Locator, what: string) => l.waitFor({ state: "visible", timeout: 15_000 }).then(() => what);
+    const first = await Promise.any([
+      show(this.username, "username"),
+      show(this.password, "password"),
+      show(this.page.getByRole("button", { name: username }), "picker"),
+    ]).catch(() => "none");
+    if (first === "none") return; // no login UI appeared: already signed in through SSO
+    if (first === "username") {
+      await this.username.fill(username);
+      await this.next.click();
+    } else if (first === "picker") {
+      await this.page.getByRole("button", { name: username }).click();
+    }
     await this.password.fill(password);
     await this.signIn.click();
     await this.acceptStaySignedIn();
