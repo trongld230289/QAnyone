@@ -56,16 +56,28 @@ function mergePointer(rel) {
   const e = current.indexOf(END);
   if (s >= 0 && e > s) {
     writeFileSync(dst, current.slice(0, s) + block.trimEnd() + current.slice(e + END.length));
-    return "block refreshed";
+    return "QAnyone section updated (your own content kept)";
+  }
+  // A file written by an older installer (no markers) holds only the QAnyone text: replace it
+  // instead of appending a second copy. Any other content is the user's and is kept.
+  if (looksLikeQAnyoneOnly(current)) {
+    writeFileSync(dst, block);
+    return "QAnyone section updated (old format replaced)";
   }
   writeFileSync(dst, current.trimEnd() + "\n\n" + block);
-  return "block appended to your existing file";
+  return "QAnyone section added after your own content";
+}
+
+function looksLikeQAnyoneOnly(text) {
+  const t = text.trim();
+  return t.startsWith("# QAnyone") && t.includes("READ `QAnyone/core.md`") && t.split("\n").length <= 15;
 }
 
 const notes = POINTERS.map((p) => `  ${p}: ${mergePointer(p)}`).join("\n");
 
 if (cmd === "update") {
-  console.log(`QAnyone framework files refreshed in ${target}
+  console.log(`QAnyone updated in ${target}
+  QAnyone/: framework files replaced
 ${notes}
 
 Next:
@@ -75,6 +87,7 @@ Next:
 `);
 } else {
   console.log(`QAnyone installed in ${target}
+  QAnyone/: framework files copied
 ${notes}
 
 Next:

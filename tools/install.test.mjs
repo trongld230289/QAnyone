@@ -77,3 +77,24 @@ test("init keeps an existing CLAUDE.md and appends the QAnyone block once; updat
   assert.equal(claude.match(/qanyone:start/g).length, 1);
   rmSync(dir, { recursive: true, force: true });
 });
+
+test("update replaces a marker-less CLAUDE.md written by an older installer instead of appending", () => {
+  const dir = mkdtempSync(join(tmpdir(), "qanyone-old-"));
+  assert.equal(run("init", dir).status, 0);
+  const block = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+  const inner = block.replace("<!-- qanyone:start -->\n", "").replace("<!-- qanyone:end -->\n", "");
+  const { writeFileSync } = require("node:fs");
+  writeFileSync(join(dir, "CLAUDE.md"), inner); // what init wrote before markers existed
+  const r = run("update", dir);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /old format replaced/);
+  const after = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+  assert.equal(after.split("<!-- qanyone:start -->").length - 1, 1);
+  assert.equal(after.split("# QAnyone — Playwright E2E automation framework").length - 1, 1, "heading must appear once");
+  // a file with the user's own content is still appended to, not replaced
+  writeFileSync(join(dir, "CLAUDE.md"), "# My notes\n\nkeep me\n");
+  assert.equal(run("update", dir).status, 0);
+  const kept = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+  assert.match(kept, /^# My notes\n\nkeep me\n\n<!-- qanyone:start -->/);
+  rmSync(dir, { recursive: true, force: true });
+});
