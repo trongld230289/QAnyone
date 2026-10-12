@@ -15,39 +15,27 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
 3. Build the project from `qanyone.config.md` (`T` = `QAnyone/templates/`):
    - RUN `npm init -y` · `npm i -D @playwright/test dotenv tsx typescript @types/node` ·
      `npx playwright install <browsers from config>`
-   - WRITE `playwright.config.ts` from `T/playwright.config.ts`; uncomment the firefox/webkit
-     projects listed in `browsers`.
-   - WRITE `tsconfig.json`: `{ "compilerOptions": { "target": "ES2022", "module": "ESNext",
-     "moduleResolution": "Bundler", "strict": true, "noEmit": true, "skipLibCheck": true,
-     "types": ["node"] }, "exclude": ["node_modules", "QAnyone"] }` (templates must not be compiled in place).
-   - Copy `T/base.page.ts → pages/`, `T/page.template.ts → pages/` (kept as the pattern for
-     new pages), `T/pages.fixture.ts → fixtures/`, `T/env.ts → helpers/`, `T/totp.ts → helpers/`
-     (always; auth.setup.ts imports it), `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`.
-   - Normally already created by the installer, so the IDE had them before this chat — copy only
-     when missing: `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`,
-     `T/playwright-mcp.json → playwright-mcp.json`, and the approvals `T/claude-settings.json →
-     .claude/settings.json`, `T/vscode-settings.json → .vscode/settings.json` (exists → add only
-     the keys it lacks; it is the user's file).
-   - `auth` ≠ none → copy `T/login.<auth>.page.ts → pages/login.page.ts`
-     (`form`, `azure-ad`, `google`; `okta-auth0` / `other` start from `login.form.page.ts`).
-     `auth: none` → copy `T/login.form.page.ts` unchanged (auth.setup.ts imports it but skips login).
-   - `sources` has `ado` → copy `T/scripts/fetch-tc.ts` and `T/scripts/ado-writer.ts → scripts/`.
-   - WRITE `.env.example` from `T/env.example`, keeping only the keys this config needs
-     (`BASE_URL`, `AUTH_REQUIRED` and the run flags `HEADLESS`, `TRACE`, `VIDEO`,
-     `SCREENSHOT`, `VIEWPORT` always, with their defaults; login keys when auth ≠ none; `TOTP_SECRET` when
-     totp; ADO keys when sources has ado). Prefill `BASE_URL` with `base_url`; `AUTH_REQUIRED` is
-     `true` iff auth ≠ none. Then WRITE `.env` with the same content (secret values left
-     empty) unless `.env` already exists. After this write, never read `.env` again.
-   - WRITE `pom-registry/INDEX.md` (table header only), `pom-registry/_shared.md` (empty
-     heading), `test-cases/.gitkeep`, and (if missing) `playwright/.auth/user.json` containing
-     `{"cookies":[],"origins":[]}` so the MCP server can start before auth exists.
+   - RUN `node QAnyone/setup/scaffold.mjs` — one command, never overwrites (existing files are
+     reported `kept`). Do not copy template files one by one. It writes, from the config:
+     `playwright.config.ts` (firefox/webkit projects uncommented per `browsers`), `tsconfig.json`,
+     `pages/base.page.ts`, `pages/page.template.ts`, `fixtures/pages.fixture.ts`, `helpers/env.ts`,
+     `helpers/totp.ts`, `tests/auth.setup.ts`, `.gitignore`, `pages/login.page.ts` (from
+     `T/login.<auth>.page.ts`; `okta-auth0` / `other` / `none` use the form one), `scripts/*.ts`
+     when `sources` has `ado`; the IDE files when missing (`.mcp.json`, `.vscode/mcp.json`,
+     `playwright-mcp.json`, `.claude/settings.json`, `.vscode/settings.json`); `.env.example` and
+     `.env` with only the keys this config needs (`BASE_URL`, `ADO_ORG`, `ADO_PROJECT` prefilled,
+     `AUTH_REQUIRED` = auth ≠ none, run flags with defaults, secret values empty); `pom-registry/`,
+     `test-cases/.gitkeep`, `playwright/.auth/user.json`. Its last line names the `.env` keys the
+     user must fill. After this, never read `.env`.
+   - `.claude/settings.json` / `.vscode/settings.json` reported `kept` → add only the keys of
+     `T/claude-settings.json` / `T/vscode-settings.json` they lack (the file is the user's).
    - Only if the BROWSER tools are not available in this chat (the MCP config was created just
      now): say "Restart Copilot Chat / Claude Code once so the Playwright browser tools load",
      then continue with step 4.
    - WRITE `QANYONE_STATE.md` (formats.md §3): `phase: setup`, `auth`, `sources`, `browsers`,
      `language` from config, `auth_ready: false`, `ado_configured: false`.
-4. If auth ≠ none or sources has ado: say "Open `.env` and fill in <the empty keys, by
-   name>, then type `OK`." Wait. On `OK`: never open or search `.env` (its lines would land in the
+4. If the scaffold named keys to fill: say "Open `.env` and fill in <those keys>, then type
+   `OK`." Wait. On `OK`: never open or search `.env` (its lines would land in the
    transcript). RUN a check that prints key names only:
    `node -e "require('dotenv').config();const m=process.argv.slice(1).filter(k=>!process.env[k]);console.log(m.length?'missing: '+m.join(' '):'ok')" LOGIN_USERNAME LOGIN_PASSWORD`
    (list the keys this config needs). `missing:` → repeat the request, wait again.

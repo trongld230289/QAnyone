@@ -429,7 +429,6 @@
       "h.shot": "one image at the end of the test. only-on-failure = only when it fails · on = every test · off = never",
       "h.user": "username (or email) of a test account", "h.pass": "that account's password",
       "h.totp": "the authenticator setup key (base32)", "h.totp.later": "you don't have it yet — get it from whoever owns the account",
-      "h.org": "same as your answer 6: {v}", "h.org0": "your organization URL, as in question 6", "h.proj": "same as your answer 6: {v}", "h.proj0": "the project name, as in question 6",
       "h.pat": "a Personal Access Token with Test Management read & write",
       "st.wait": "Answer question 2 to see which keys you will fill.",
       "st.ok": "Nothing for you to fill — SETUP writes <code>.env</code> itself.",
@@ -472,7 +471,6 @@
       "h.shot": "một ảnh cuối test. only-on-failure = chỉ chụp khi fail · on = mọi test · off = không chụp",
       "h.user": "username (hoặc email) của tài khoản test", "h.pass": "mật khẩu của tài khoản đó",
       "h.totp": "khoá thiết lập của app authenticator (base32)", "h.totp.later": "bạn chưa có — xin từ người quản lý tài khoản",
-      "h.org": "giống câu trả lời 6: {v}", "h.org0": "URL tổ chức, như ở câu 6", "h.proj": "giống câu trả lời 6: {v}", "h.proj0": "tên project, như ở câu 6",
       "h.pat": "Personal Access Token có quyền Test Management đọc & ghi",
       "st.wait": "Trả lời câu 2 để biết bạn cần điền key nào.",
       "st.ok": "Bạn không cần điền gì — SETUP tự ghi <code>.env</code>.",
@@ -687,6 +685,8 @@
     const totp = needsAuth && radio("two_fa") === "totp", ado = checks("sources").includes("ado");
     const fill = (on, k, q, why, secret) => on ? { k, q, st: "fill", tag: t(secret ? "e.secret" : "e.fill"), why } : { k, q, st: "off", tag: t("e.off") };
     const org = val("ado_org"), proj = val("ado_project");
+    // a non-secret key SETUP prefills from an answer (question n); dropped when not needed
+    const pre = (on, k, v, n) => !on ? { k, q: "q-ado", st: "off", tag: t("e.off") } : v ? { k, q: "q-ado", st: "pre", v, tag: t("e.pre") } : { k, q: "q-ado", st: "todo", v: t("e.from", { n }), tag: t("e.wait") };
     return [
       ["g.app", [
         isUrl(base) ? { k: "BASE_URL", q: "q-base", st: "pre", v: base, tag: t("e.pre") } : { k: "BASE_URL", q: "q-base", st: "todo", v: t("e.from", { n: 1 }), tag: t("e.wait") },
@@ -696,7 +696,7 @@
         .map(([k, v, h]) => ({ k, st: "dflt", v, tag: t("e.dflt"), why: t(h) }))],
       ["g.login", [fill(needsAuth, "LOGIN_USERNAME", "q-auth", t("h.user")), fill(needsAuth, "LOGIN_PASSWORD", "q-auth", t("h.pass"), true)]],
       ["g.2fa", [fill(totp, "TOTP_SECRET", totp ? "q-totp" : "q-two-fa", t(radio("totp_secret_available") === "false" ? "h.totp.later" : "h.totp"), true)]],
-      ["g.ado", [fill(ado, "ADO_ORG", "q-ado", org ? t("h.org", { v: org }) : t("h.org0")), fill(ado, "ADO_PROJECT", "q-ado", proj ? t("h.proj", { v: proj }) : t("h.proj0")), fill(ado, "ADO_PAT", "q-ado", t("h.pat"), true)]],
+      ["g.ado", [pre(ado, "ADO_ORG", isUrl(org) && org, 6), pre(ado, "ADO_PROJECT", proj, 6), fill(ado, "ADO_PAT", "q-ado", t("h.pat"), true)]],
     ];
   }
   const div = (cls, text) => { const d = document.createElement("div"); if (cls) d.className = cls; if (text != null) d.textContent = text; return d; };

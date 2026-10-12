@@ -6,6 +6,8 @@
     "npx": true,
     "node": true,
     "/^git (status|diff|log)\\b/": true,
+    // a copy out of QAnyone/templates only (SETUP itself uses `node QAnyone/setup/scaffold.mjs`)
+    "/^(Copy-Item|cp)\\s+(-\\S+\\s+)*[\"']?(\\.[\\\\/])?QAnyone[\\\\/]templates[\\\\/]/": true,
     "rm": false,
     "del": false,
     "/dangerous/": false

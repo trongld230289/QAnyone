@@ -10,6 +10,7 @@
       "Bash(npx tsc:*)",
       "Bash(npx tsx:*)",
       "Bash(node:*)",
+      "Bash(cp QAnyone/templates/:*)",
       "mcp__playwright__*"
     ],
     "deny": [
