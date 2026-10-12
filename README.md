@@ -64,7 +64,7 @@ test-cases/ · pom-registry/ · QANYONE_STATE.md · qanyone.config.md · .env (i
 | `QAnyone/pipeline.md` | `NEW TC`, `RERUN TC`, `PUSH ADO`, `STATUS` |
 | `QAnyone/formats.md` | Test case, registry, state and config formats |
 | `QAnyone/rules.md` | Locator, action, assertion and self-heal rules |
-| `QAnyone/setup/index.html` | Offline setup form |
+| `QAnyone/setup/index.html` | Offline setup form (`setup/open.mjs` opens it in the browser, prefilled on Onboard) |
 | `QAnyone/templates/` | Playwright config, auth setup, page objects, fixture, helpers, ADO scripts |
 
 ## Development (this repo)

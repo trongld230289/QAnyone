@@ -8,8 +8,9 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
 ```
 
 ## A. Scaffold (empty repo)
-1. Say: "Open `QAnyone/setup/index.html` in your browser, answer the questions, click
-   **Generate**, copy the text and paste it here." Stop and wait for the paste.
+1. RUN `node QAnyone/setup/open.mjs` (opens the form in the default browser and prints its
+   URL). Say: "The setup form is open in your browser (link above if not). Answer the
+   questions, click **Generate**, copy the text and paste it here." Stop and wait for the paste.
 2. WRITE the pasted text to `qanyone.config.md`. From here on, no questions.
 3. Build the project from `qanyone.config.md` (`T` = `QAnyone/templates/`):
    - RUN `npm init -y` · `npm i -D @playwright/test dotenv tsx typescript @types/node` ·
@@ -81,9 +82,9 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    SEARCH the page-object folder the config or layout implies (class names, public methods),
    `tests/**/*.spec.ts` (describe / test titles), `.env` (key names only),
    `playwright/.auth/*.json` or the configured storageState path (exists? age?).
-2. Build a prefilled link and say: "Open this to confirm the detected settings, then paste the
-   generated text here:"
-   `QAnyone/setup/index.html?baseUrl=<…>&auth=<none|form|azure-ad|google|other>&sources=<ado if an ADO_PAT key exists>,md&browsers=<from projects>&language=en`
+2. RUN `node QAnyone/setup/open.mjs "?baseUrl=<…>&auth=<none|form|azure-ad|google|other>&sources=<ado if an ADO_PAT key exists>,md&browsers=<from projects>&language=en"`
+   (opens the form prefilled with the detected settings). Say: "Confirm the detected settings
+   in the form that just opened, click **Generate**, then paste the text here."
    Wait for the paste → WRITE `qanyone.config.md`.
 3. Reconcile without overwriting the user's files:
    - WRITE `pom-registry/INDEX.md` + one `<feature>.md` per existing page class (feature =
