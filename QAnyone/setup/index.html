@@ -128,7 +128,7 @@
   label:has(> #auth_other) > span { white-space:nowrap; margin-right:8px; }
   label > #auth_other { flex:1; min-width:0; }
   /* label + input rows that share one label column, so the inputs line up */
-  .fields { display:grid; grid-template-columns:max-content minmax(240px, 420px); gap:10px 12px; align-items:center; padding:4px 12px; }
+  .fields { display:grid; grid-template-columns:max-content minmax(0, 1fr); gap:10px 12px; align-items:center; padding:4px 12px; }
   .fields label { display:block; margin:0; padding:0; text-indent:0; }
   .fields input[type=text] { width:100%; min-width:0; }
   @media (max-width: 560px) { .fields { grid-template-columns:1fr; gap:4px 0; } .fields input[type=text] { margin-bottom:8px; } }
