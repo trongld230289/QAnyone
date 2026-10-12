@@ -54,9 +54,12 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
       (`browser_generate_locator`). Do not type credentials in the MCP browser. For `azure-ad` /
       `google` the template locators are already `[FROM TEMPLATE]`; only confirm the redirect
       to the provider happens.
-      Only when `two_fa ≠ none`: the 2FA page exists only after submitting credentials, so say
-      "Log in once in the Playwright browser window that is open, up to the 2FA screen; tell me
-      when it shows." Then `browser_snapshot` and take the 2FA input / button locators from it.
+      `two_fa: totp` → the code is computed by `helpers/totp.ts` from `TOTP_SECRET` and typed
+      by `tests/auth.setup.ts` (`enterTotp`); never type a code through BROWSER, never add an
+      OTP library. `azure-ad`: the TOTP locators are `[FROM TEMPLATE]` too — go straight to c.
+      `form` with 2FA: the 2FA page exists only after submitting credentials, so say "Log in
+      once in the Playwright browser window that is open, up to the 2FA screen; tell me when
+      it shows." Then `browser_snapshot` and take the 2FA input / button locators from it.
       BROWSER unavailable → RUN BACKGROUND `npx playwright codegen <base_url>`, ask the user to
       log in once and paste the recorded code; take locators from it (`[FROM CODEGEN]`).
       Google sign-in often blocks automated browsers; if it does, report BLOCKING.

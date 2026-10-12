@@ -36,9 +36,22 @@ export class LoginPage extends BasePage {
   }
 
   async enterTotp(code: string): Promise<void> {
+    await this.useVerificationCode();
     await this.totp.fill(code);
     await this.verify.click();
     await this.acceptStaySignedIn();
+  }
+
+  /** Tenants whose default MFA is the Authenticator push show "Approve sign in request" first:
+   *  switch to the code prompt. Both links are absent when the code prompt is already shown. */
+  private async useVerificationCode(): Promise<void> {
+    const codeShown = await this.totp.waitFor({ state: "visible", timeout: 5_000 }).then(() => true).catch(() => false);
+    if (codeShown) return;
+    await this.page
+      .getByRole("link", { name: /can't use my Microsoft Authenticator|sign in another way/i })
+      .click({ timeout: 5_000 })
+      .catch(() => undefined);
+    await this.page.getByText(/use a verification code/i).first().click({ timeout: 5_000 }).catch(() => undefined);
   }
 
   /** "Stay signed in?" appears after sign-in or after MFA; absent on some tenants. */
