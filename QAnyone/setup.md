@@ -48,8 +48,8 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    a. BROWSER: `browser_navigate` to `base_url`, `browser_snapshot` of the login page only.
       Identify the username, password and submit elements and get a locator for each
       (`browser_generate_locator`). Do not type credentials in the MCP browser. For `azure-ad` /
-      `google` the template locators are already `[FROM TEMPLATE]`; only confirm the redirect
-      to the provider happens.
+      `google` skip this BROWSER check: the template locators are `[FROM TEMPLATE]` and step c
+      shows whether the redirect to the provider happens.
       `two_fa: totp` → the code is computed by `helpers/totp.ts` from `TOTP_SECRET` and typed
       by `tests/auth.setup.ts` (`enterTotp`); never type a code through BROWSER, never add an
       OTP library. `azure-ad`: the TOTP locators are `[FROM TEMPLATE]` too — go straight to c.

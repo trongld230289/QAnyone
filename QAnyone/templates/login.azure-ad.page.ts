@@ -14,6 +14,7 @@ export class LoginPage extends BasePage {
   readonly totp: Locator;
   readonly verify: Locator;
   readonly otherWay: Locator;
+  readonly useCode: Locator;
   readonly staySignedInYes: Locator;
 
   constructor(page: Page) {
@@ -26,19 +27,23 @@ export class LoginPage extends BasePage {
     this.totp = page.locator("input[name=otc]");
     this.verify = page.getByRole("button", { name: "Verify" });
     this.otherWay = page.getByRole("link", { name: /can't use my Microsoft Authenticator|sign in another way/i });
+    // the MFA method list ("Verify your identity"), shown e.g. after seamless SSO
+    this.useCode = page.getByRole("button", { name: "Use a verification code" });
     this.staySignedInYes = page.getByRole("button", { name: "Yes" });
   }
 
   async login(username: string, password: string): Promise<void> {
     // SSO tenants may skip the username step: the account picker ("Pick an account") or the
     // password page can come first, a tenant that already knows the user (Windows SSO) goes
-    // straight to MFA, and a device already signed in lands straight in the app.
-    const show = (l: Locator, what: string) => l.waitFor({ state: "visible", timeout: 15_000 }).then(() => what);
+    // straight to MFA, and a device already signed in lands straight in the app. Seamless SSO
+    // ("Trying to sign you in") can take more than 15 s before the next screen shows.
+    const show = (l: Locator, what: string) => l.waitFor({ state: "visible", timeout: 30_000 }).then(() => what);
     const first = await Promise.any([
       show(this.username, "username"),
       show(this.password, "password"),
       show(this.page.getByRole("button", { name: username }), "picker"),
       show(this.otherWay, "mfa"),
+      show(this.useCode, "mfa"),
       show(this.totp, "mfa"),
     ]).catch(() => "none");
     if (first === "none") return; // no login UI appeared: already signed in through SSO
@@ -62,12 +67,12 @@ export class LoginPage extends BasePage {
   }
 
   /** Tenants whose default MFA is the Authenticator push show "Approve sign in request" first:
-   *  switch to the code prompt. Both links are absent when the code prompt is already shown. */
+   *  switch to the method list, then pick the code. Nothing to do when the code prompt is shown. */
   private async useVerificationCode(): Promise<void> {
     const codeShown = await this.totp.waitFor({ state: "visible", timeout: 5_000 }).then(() => true).catch(() => false);
     if (codeShown) return;
-    await this.otherWay.click({ timeout: 5_000 }).catch(() => undefined);
-    await this.page.getByText(/use a verification code/i).first().click({ timeout: 5_000 }).catch(() => undefined);
+    if (!(await this.useCode.isVisible())) await this.otherWay.click({ timeout: 5_000 }).catch(() => undefined);
+    await this.useCode.click({ timeout: 5_000 });
   }
 
   /** "Stay signed in?" appears after sign-in or after MFA; absent on some tenants. */

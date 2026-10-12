@@ -6,6 +6,9 @@ const STORAGE = "playwright/.auth/user.json";
 
 // Run flags — change them in .env, not here (see .env.example for the allowed values).
 const flag = (key: string, fallback: string): string => process.env[key]?.trim() || fallback;
+// `--headed` on the command line counts as HEADLESS=false, so that window is maximised too
+// (set in the env so the test workers see it as well).
+if (process.argv.includes("--headed")) process.env.HEADLESS = "false";
 // HEADLESS: false (default) = a browser window you can watch; true when the CI variable is set.
 const headless = flag("HEADLESS", process.env.CI ? "true" : "false") !== "false";
 const trace = flag("TRACE", "retain-on-failure") as "on" | "off" | "retain-on-failure" | "on-first-retry";

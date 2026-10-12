@@ -7,6 +7,8 @@ import { generateTotp } from "../helpers/totp";
 const STORAGE = "playwright/.auth/user.json";
 
 setup("authenticate", async ({ page, browser }) => {
+  // SSO redirects, an MFA method list and a code can take well over the default 30 s.
+  setup.setTimeout(90_000);
   mkdirSync("playwright/.auth", { recursive: true });
   if (!authRequired) {
     writeFileSync(STORAGE, JSON.stringify({ cookies: [], origins: [] }));
