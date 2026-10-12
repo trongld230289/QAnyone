@@ -17,8 +17,8 @@ language: en
 ---
 ' > qanyone.config.md
 node "$ROOT/QAnyone/setup/scaffold.mjs" .
-# TRACE=on so the passing test is traced too (checked at the end)
-sed -i.bak 's/^TRACE=.*/TRACE=on/' .env && rm -f .env.bak
+# TRACE=on so the passing test is traced too (checked at the end); HEADLESS=true: no window here
+sed -i.bak -e 's/^TRACE=.*/TRACE=on/' -e 's/^HEADLESS=.*/HEADLESS=true/' .env && rm -f .env.bak
 cat > tests/smoke.spec.ts <<'EOF'
 import { test, expect } from "../fixtures/pages.fixture";
 test.describe("SMOKE todomvc", { tag: ["@smoke"] }, () => {

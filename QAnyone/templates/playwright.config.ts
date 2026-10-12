@@ -6,7 +6,8 @@ const STORAGE = "playwright/.auth/user.json";
 
 // Run flags — change them in .env, not here (see .env.example for the allowed values).
 const flag = (key: string, fallback: string): string => process.env[key]?.trim() || fallback;
-const headless = flag("HEADLESS", "true") !== "false";
+// HEADLESS: false (default) = a browser window you can watch; true when the CI variable is set.
+const headless = flag("HEADLESS", process.env.CI ? "true" : "false") !== "false";
 const trace = flag("TRACE", "retain-on-failure") as "on" | "off" | "retain-on-failure" | "on-first-retry";
 const video = flag("VIDEO", "retain-on-failure") as "on" | "off" | "retain-on-failure";
 const screenshot = flag("SCREENSHOT", "only-on-failure") as "on" | "off" | "only-on-failure";

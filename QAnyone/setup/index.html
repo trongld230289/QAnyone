@@ -692,7 +692,7 @@
         isUrl(base) ? { k: "BASE_URL", q: "q-base", st: "pre", v: base, tag: t("e.pre") } : { k: "BASE_URL", q: "q-base", st: "todo", v: t("e.from", { n: 1 }), tag: t("e.wait") },
         auth ? { k: "AUTH_REQUIRED", q: "q-auth", st: "pre", v: String(needsAuth), tag: t("e.pre") } : { k: "AUTH_REQUIRED", q: "q-auth", st: "todo", v: t("e.from", { n: 2 }), tag: t("e.wait") },
       ]],
-      ["g.run", [["HEADLESS", "true", "h.headless"], ["TRACE", "retain-on-failure", "h.trace"], ["VIDEO", "retain-on-failure", "h.video"], ["SCREENSHOT", "only-on-failure", "h.shot"]]
+      ["g.run", [["HEADLESS", "false", "h.headless"], ["TRACE", "retain-on-failure", "h.trace"], ["VIDEO", "retain-on-failure", "h.video"], ["SCREENSHOT", "only-on-failure", "h.shot"]]
         .map(([k, v, h]) => ({ k, st: "dflt", v, tag: t("e.dflt"), why: t(h) }))],
       ["g.login", [fill(needsAuth, "LOGIN_USERNAME", "q-auth", t("h.user")), fill(needsAuth, "LOGIN_PASSWORD", "q-auth", t("h.pass"), true)]],
       ["g.2fa", [fill(totp, "TOTP_SECRET", totp ? "q-totp" : "q-two-fa", t(radio("totp_secret_available") === "false" ? "h.totp.later" : "h.totp"), true)]],
