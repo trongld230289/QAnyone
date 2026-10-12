@@ -70,7 +70,7 @@ sources: [md]           # subset of [ado, md, codegen]
 ado_configured: false
 browsers: [chromium]
 language: en
-current_tc:             # id while NEW TC / RERUN TC is in progress, else empty
+current_tc:             # id while RUN TC / RERUN TC is in progress, else empty
 current_step:           # 1-intake 2-normalize 3-map 4-discover 5-pom 6-spec 7-run 8-memory 9-report
 tcs: {}                 # id: status
 ```

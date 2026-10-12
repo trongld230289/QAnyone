@@ -1,27 +1,27 @@
-# NEW TC · RERUN TC · PUSH ADO · STATUS
+# RUN TC · RERUN TC · PUSH ADO · STATUS
 
 Read `rules.md` before step 5 and `formats.md` before step 2. After every step: EDIT
 `QANYONE_STATE.md` (`current_tc`, `current_step`). A new chat continues from `current_step`
 without repeating earlier questions. Several ids → run the whole pipeline per id, in order.
-TASKS is the first tool call of NEW TC and RERUN TC, before any RUN, WRITE or BROWSER: it replaces
+TASKS is the first tool call of RUN TC and RERUN TC, before any RUN, WRITE or BROWSER: it replaces
 any earlier list with exactly one item per step that will run, titled `1 Intake`, `2 Normalize`,
 `3 Map`, `4 Discover`, `5 POM`, `6 Spec`, `7 Run + self-heal`, `8 Memory`, `9 Report` (RERUN TC
 or resume: only the steps left). Never add, rename or drop items: the test case's own steps are
 not tasks. Several test cases → prefix each title with the test case id and rewrite the list when
 the next one starts. Mark an item in progress when its step starts, completed when it ends.
 
-## NEW TC
+## RUN TC
 ### 0. Precheck (silent)
 `phase: ready`; `auth_ready: true` when `auth ≠ none`; BROWSER tools available (otherwise
 say which MCP config to enable and stop). Numeric id but `ado_configured: false` → BLOCKING
 ("fill the ADO keys in .env, or give a markdown file").
 
 ### 1. Intake → raw steps
-- `NEW TC <number>` → RUN `npx tsx scripts/fetch-tc.ts <id>` → JSON `{ id, title, steps[] }`.
-- `NEW TC <path.md>` → READ the file. Any shape: tables, bullets, Gherkin, numbered prose,
+- `RUN TC <number>` → RUN `npx tsx scripts/fetch-tc.ts <id>` → JSON `{ id, title, steps[] }`.
+- `RUN TC <path.md>` → READ the file. Any shape: tables, bullets, Gherkin, numbered prose,
   Vietnamese or English, one or many test cases. Split into test cases at headings, or at
   blank-line-separated blocks that start a new scenario.
-- `NEW TC <name>` → RUN BACKGROUND
+- `RUN TC <name>` → RUN BACKGROUND
   `npx playwright codegen <base_url> --load-storage=playwright/.auth/user.json`
   (omit `--load-storage` when auth = none). Say: "The browser is open. Do the flow once, then
   copy the recorded code from the Playwright Inspector and paste it here." Wait. Parse the paste:

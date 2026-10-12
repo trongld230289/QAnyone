@@ -7,4 +7,4 @@
 - Dogfood checklist: `docs/superpowers/plans/2026-10-10-qanyone-v2.md` Task 14.
 - Private identifiers to block are listed in the git-ignored `tools/forbidden.local` (one regex per line); the lint loads it when present. Keep that file on your machine, never commit it.
 - Debugging a test project: `python tools/collect-debug.py <project_dir>` writes one redacted markdown bundle (files, state, test-results, tsc, latest Claude Code / Copilot transcripts) to send back for analysis. Dev tool only, not shipped.
-- Checking a dogfood run: `python tools/check-run.py <project_dir>` reads the latest Copilot Chat session of that folder and checks its last `NEW TC` turn (task list = the 9 pipeline steps, written first; Steps table shown in chat). Exit 0 = pass. Run it after every pipeline change.
+- Checking a dogfood run: `python tools/check-run.py <project_dir>` reads the latest Copilot Chat session of that folder and checks its last `RUN TC` turn (task list = the 9 pipeline steps, written first; Steps table shown in chat). Exit 0 = pass. Run it after every pipeline change.

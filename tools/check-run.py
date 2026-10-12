@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Check the last NEW TC run of a QAnyone test project against the pipeline (dev eval, not shipped).
+"""Check the last RUN TC run of a QAnyone test project against the pipeline (dev eval, not shipped).
 
 Usage: python tools/check-run.py [project_dir] [--session FILE]
-Reads the latest Copilot Chat session of the folder (or FILE) and checks its last `NEW TC` turn:
+Reads the latest Copilot Chat session of the folder (or FILE) and checks its last `RUN TC` turn
+(`NEW TC`, the old name, counts too):
   tasks  the first task list lists the pipeline steps 1 Intake … 9 Report, is written before any
          work (command, file creation, browser) and keeps those items for the whole turn
   steps  after the test case file is written, a chat message shows its Steps table
@@ -70,7 +71,7 @@ def events(path: Path) -> list[tuple[str, object]]:
 
 
 def last_new_tc(evts: list[tuple[str, object]]):
-    starts = [i for i, (k, v) in enumerate(evts) if k == "user" and str(v).strip().upper().startswith("NEW TC")]
+    starts = [i for i, (k, v) in enumerate(evts) if k == "user" and str(v).strip().upper().startswith(("RUN TC", "NEW TC"))]
     if not starts:
         return None, []
     s = starts[-1]
@@ -131,7 +132,7 @@ def main() -> int:
         session = max(files, key=lambda p: p.stat().st_mtime)
     prompt, turn = last_new_tc(events(session))
     if prompt is None:
-        print(f"no NEW TC turn in {session.name}")
+        print(f"no RUN TC turn in {session.name}")
         return 2
     print(f"{prompt.strip()}  ({session.name})")
     ok = True

@@ -77,7 +77,7 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    then BROWSER `browser_navigate` to `base_url` and confirm the page title is non-empty.
    BROWSER unavailable → say which MCP config to enable; this is not blocking for SETUP.
 7. EDIT state `phase: ready`. Report: what was created, which browsers, auth status, and
-   "Next: `NEW TC <ADO id | path.md | name>`."
+   "Next: `RUN TC <ADO id | path.md | name>`."
 
 ## B. Onboard (existing Playwright repo)
 1. Scan, no questions: READ `playwright.config.ts` (`baseURL`, `projects`, `storageState`);

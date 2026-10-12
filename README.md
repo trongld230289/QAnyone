@@ -34,16 +34,16 @@ package and you keep the old framework files.
 `SETUP` writes `.claude/settings.json` (Claude Code: `acceptEdits`, the pipeline's `npm` / `npx` /
 `node` commands and the Playwright MCP tools allowed, reading `.env` denied) and
 `.vscode/settings.json` (Copilot Chat: terminal commands auto-approved, `chat.tools.global.autoApprove`
-on). So `NEW TC` runs without a prompt per step; it still stops once to confirm normalized steps for
+on). So `RUN TC` runs without a prompt per step; it still stops once to confirm normalized steps for
 markdown / codegen sources, and before `PUSH ADO`. Edit those two files to tighten.
 
 ## Commands
 | Command | What it does |
 |---|---|
 | `SETUP` | First-time scaffold, import of an existing Playwright repo, or resume — auto-detected. Opens an offline HTML form for the 8 setup questions (2 required, EN/VI). |
-| `NEW TC <ADO id>` | Fetch a test case from Azure DevOps and build the test |
-| `NEW TC <path.md>` | Normalize a free-form markdown file (one or many test cases), confirm once, build the tests |
-| `NEW TC <name>` | Record the flow with Playwright codegen, confirm the steps, build the test |
+| `RUN TC <ADO id>` | Fetch a test case from Azure DevOps and build the test |
+| `RUN TC <path.md>` | Normalize a free-form markdown file (one or many test cases), confirm once, build the tests |
+| `RUN TC <name>` | Record the flow with Playwright codegen, confirm the steps, build the test |
 | `RERUN TC <id>` | Re-run one test (regenerates the spec if its test case file changed) |
 | `STATUS` | Phase, auth state, test cases and page-object registry |
 | `PUSH ADO <id>` | Create or update the test case in Azure DevOps after a preview |
@@ -70,7 +70,7 @@ test-cases/ · pom-registry/ · QANYONE_STATE.md · qanyone.config.md · .env (i
 |---|---|
 | `QAnyone/core.md` | Commands, platform tool map, hard rules, error handling |
 | `QAnyone/setup.md` | `SETUP`: scaffold / onboard / resume |
-| `QAnyone/pipeline.md` | `NEW TC`, `RERUN TC`, `PUSH ADO`, `STATUS` |
+| `QAnyone/pipeline.md` | `RUN TC`, `RERUN TC`, `PUSH ADO`, `STATUS` |
 | `QAnyone/formats.md` | Test case, registry, state and config formats |
 | `QAnyone/rules.md` | Locator, action, assertion and self-heal rules |
 | `QAnyone/setup/index.html` | Offline setup form (`setup/open.mjs` opens it in the browser, prefilled on Onboard) |

@@ -299,7 +299,7 @@
     <div class="uline" style="--c:var(--green)"></div>
 
     <div class="terminal">
-      <span class="t"><span class="d">$</span> NEW TC <span class="a">&lt;ADO id | path.md | name&gt;</span></span>
+      <span class="t"><span class="d">$</span> RUN TC <span class="a">&lt;ADO id | path.md | name&gt;</span></span>
     </div>
 
     <div class="pipe">
@@ -355,7 +355,7 @@
     <!-- LIVE RUN SIMULATION -->
     <div class="runsim sketch shadowed" id="runsim" style="--c:var(--teal)">
       <div class="runsim-head">
-        <div class="caps">▶ Live run · <code>NEW TC 102874</code> — watch the agent work, step by step</div>
+        <div class="caps">▶ Live run · <code>RUN TC 102874</code> — watch the agent work, step by step</div>
       </div>
       <div class="runsim-grid">
         <ol class="stepper" id="stepper" aria-label="Pipeline stages">
@@ -427,7 +427,7 @@
     <div class="flow-demo">
       <div class="fbox sketch shadowed" style="--c:var(--purple)">📄 Write or record the case</div>
       <span class="arrow">➜</span>
-      <div class="fbox sketch shadowed" style="--c:var(--green)">⚡ Run <code>NEW TC</code></div>
+      <div class="fbox sketch shadowed" style="--c:var(--green)">⚡ <code>RUN TC</code></div>
       <span class="arrow">➜</span>
       <div class="fbox sketch shadowed" style="--c:var(--blue)">✅ Passing spec · <code>PUSH ADO</code> optional</div>
     </div>
@@ -443,7 +443,7 @@
       <tbody>
         <tr><td><code>QAnyone/core.md</code></td><td>Commands, platform tool map, hard rules, error handling</td></tr>
         <tr><td><code>QAnyone/setup.md</code></td><td><code>SETUP</code> — scaffold / onboard / resume</td></tr>
-        <tr><td><code>QAnyone/pipeline.md</code></td><td><code>NEW TC</code>, <code>RERUN TC</code>, <code>PUSH ADO</code>, <code>STATUS</code></td></tr>
+        <tr><td><code>QAnyone/pipeline.md</code></td><td><code>RUN TC</code>, <code>RERUN TC</code>, <code>PUSH ADO</code>, <code>STATUS</code></td></tr>
         <tr><td><code>QAnyone/formats.md</code></td><td>Test case, registry, state and config formats</td></tr>
         <tr><td><code>QAnyone/rules.md</code></td><td>Locator, action, assertion and self-heal rules</td></tr>
         <tr><td><code>QAnyone/setup/index.html</code></td><td>Offline setup form</td></tr>
@@ -461,7 +461,7 @@
 (function(){
   // Real-time run log — stage index maps to the stepper (0..8), 9 = finished
   var EVENTS = [
-    {s:0, t:"$ NEW TC 102874", c:"cmd"},
+    {s:0, t:"$ RUN TC 102874", c:"cmd"},
     {s:0, t:"▶ Intake — fetching TC #102874 from Azure DevOps…", c:"run"},
     {s:0, t:"✓ 8 steps received", c:"ok"},
     {s:1, t:"▶ Normalize → test-cases/102874-verify-schedule.md", c:"run"},

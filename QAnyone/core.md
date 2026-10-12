@@ -8,7 +8,7 @@ app's source code. You work in GitHub Copilot Chat or Claude Code — see Platfo
 1. READ `QANYONE_STATE.md` if it exists. It is the checkpoint: phase, auth, current TC and step.
 2. If `phase != ready` or `current_tc` is set → continue from `current_step` (see pipeline.md).
    Do not re-ask questions that were already confirmed. Exception: when the user's message is
-   itself a command (`NEW TC …`, `RERUN TC …`, `STATUS`, `PUSH ADO …`, `SETUP`), mark the
+   itself a command (`RUN TC …`, `RERUN TC …`, `STATUS`, `PUSH ADO …`, `SETUP`), mark the
    abandoned TC `status: blocked` (note "abandoned by user"), clear `current_*`, and run the
    new command instead.
 3. Then READ only the context file for the user's command (table below), even if you read it
@@ -19,15 +19,15 @@ app's source code. You work in GitHub Copilot Chat or Claude Code — see Platfo
 | Command | Context file | What happens |
 |---|---|---|
 | `SETUP` | setup.md | First-time scaffold, import of an existing Playwright repo, or resume — auto-detected |
-| `NEW TC <ADO id>` | pipeline.md | Fetch test case from Azure DevOps, build and run the test |
-| `NEW TC <path.md>` | pipeline.md | Normalize a free-form markdown test case file (may hold several TCs) |
-| `NEW TC <name>` | pipeline.md | Record the flow with codegen, then build and run the test |
+| `RUN TC <ADO id>` | pipeline.md | Fetch test case from Azure DevOps, build and run the test |
+| `RUN TC <path.md>` | pipeline.md | Normalize a free-form markdown test case file (may hold several TCs) |
+| `RUN TC <name>` | pipeline.md | Record the flow with codegen, then build and run the test |
 | `RERUN TC <id>` | pipeline.md | Re-run one test; regenerate spec first if its TC file changed |
 | `STATUS` | pipeline.md | Print phase, auth state, TC list with status, registry counts |
 | `PUSH ADO <id>` | pipeline.md | Create/update the test case on Azure DevOps after a preview |
 | `UPDATE` | setup.md | After `npx … update`: sync generated files with the new templates, keeping user values |
 
-Several ids: `NEW TC 101 102 103` → run the pipeline per id, sequentially.
+Several ids: `RUN TC 101 102 103` → run the pipeline per id, sequentially.
 Anything else → answer briefly and show this table. Do not start work without a command.
 
 ## Platform map
@@ -51,7 +51,7 @@ fallback. Never put a terminal command inside an ASK — the user cannot copy fr
 run it yourself.
 
 BROWSER requires the Playwright MCP server (`@playwright/mcp`). If its tools are not available
-during NEW TC / RERUN TC: say exactly what to enable (the MCP config file for this platform,
+during RUN TC / RERUN TC: say exactly what to enable (the MCP config file for this platform,
 then restart) and stop. During SETUP, follow the codegen fallback in setup.md instead.
 Never substitute DOM-dump scripts, `page.evaluate`, or guessed locators.
 
@@ -74,7 +74,7 @@ Non-blocking → fix and retry yourself, do not ask:
 - Command fails / TypeScript error / test fails → read the error, fix, rerun (test: ≤ 3 rounds).
 - Response was cut off → continue from where it stopped; do not restart.
 
-Blocking → inside NEW TC / RERUN TC run pipeline steps 8–9 with `status: blocked` (this
+Blocking → inside RUN TC / RERUN TC run pipeline steps 8–9 with `status: blocked` (this
 clears `current_*`); otherwise WRITE state. Then explain what is blocked and what the user
 must do, and stop:
 - Login cannot be completed (expired credentials, unsupported MFA, CAPTCHA).
