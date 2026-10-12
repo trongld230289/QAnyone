@@ -10,10 +10,10 @@ const headless = flag("HEADLESS", "true") !== "false";
 const trace = flag("TRACE", "retain-on-failure") as "on" | "off" | "retain-on-failure" | "on-first-retry";
 const video = flag("VIDEO", "retain-on-failure") as "on" | "off" | "retain-on-failure";
 const screenshot = flag("SCREENSHOT", "only-on-failure") as "on" | "off" | "only-on-failure";
-// VIEWPORT: "<width>x<height>" (default 1280x720) or "max" = window maximised, page fills it
+// VIEWPORT: "max" (default) = window maximised, page fills it, or "<width>x<height>"
 // (headed Chromium only; headless has no window, so "max" falls back to 1280x720).
 // Spread `...win` after `devices[...]` so it wins over the device size.
-const viewport = flag("VIEWPORT", "1280x720");
+const viewport = flag("VIEWPORT", "max");
 const size = /^(\d+)x(\d+)$/.exec(viewport);
 const win = viewport === "max" && !headless
   ? { viewport: null, deviceScaleFactor: undefined, launchOptions: { args: ["--start-maximized"] } }
