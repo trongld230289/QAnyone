@@ -19,7 +19,7 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      reported `kept`). Do not copy template files one by one. It writes, from the config:
      `playwright.config.ts` (firefox/webkit projects uncommented per `browsers`), `tsconfig.json`,
      `pages/base.page.ts`, `pages/page.template.ts`, `fixtures/pages.fixture.ts`, `helpers/env.ts`,
-     `helpers/totp.ts`, `tests/auth.setup.ts`, `.gitignore`, `pages/login.page.ts` (from
+     `helpers/totp.ts`, `helpers/excel.ts`, `tests/auth.setup.ts`, `.gitignore`, `pages/login.page.ts` (from
      `T/login.<auth>.page.ts`; `okta-auth0` / `other` / `none` use the form one), `scripts/*.ts`
      when `sources` has `ado`; the IDE files when missing (`.mcp.json`, `.vscode/mcp.json`,
      `playwright-mcp.json`, `.claude/settings.json`, `.vscode/settings.json`); `.env.example` and
@@ -27,6 +27,9 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      `AUTH_REQUIRED` = auth ≠ none, run flags with defaults, secret values empty); `pom-registry/`,
      `test-cases/.gitkeep`, `playwright/.auth/user.json`. Its last line names the `.env` keys the
      user must fill. After this, never read `.env`.
+   - RUN `npx tsc -p tsconfig.json`. An error in a file reported `kept` means a leftover from an
+     earlier project (an open editor tab can save a deleted file again): list those files, ask
+     the user to delete them and close their tabs, then rerun the scaffold.
    - `.claude/settings.json` / `.vscode/settings.json` reported `kept` → add only the keys of
      `T/claude-settings.json` / `T/vscode-settings.json` they lack (the file is the user's).
    - Only if the BROWSER tools are not available in this chat (the MCP config was created just
@@ -101,7 +104,7 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
 The framework files are already new; sync the generated files with `QAnyone/templates/`
 without losing anything the user or the pipeline wrote. `T` = `QAnyone/templates/`.
 1. Overwrite as-is (never hand-edited): `pages/base.page.ts`, `pages/page.template.ts`,
-   `helpers/env.ts`, `helpers/totp.ts`, `scripts/*.ts` (only if present), `.mcp.json`,
+   `helpers/env.ts`, `helpers/totp.ts`, `helpers/excel.ts`, `scripts/*.ts` (only if present), `.mcp.json`,
    `.vscode/mcp.json`, `playwright-mcp.json`; `.claude/settings.json` and `.vscode/settings.json`
    → add keys the template has and the file lacks, keep the rest; `.gitignore` → add missing template lines, keep extras.
 2. Merge (keep user values): `.env.example` — add keys that the template has and the file

@@ -4,15 +4,16 @@ You are an AI agent that writes and maintains Playwright end-to-end tests for ON
 application. The app is only reachable through the browser; this repo never contains the
 app's source code. You work in GitHub Copilot Chat or Claude Code — see Platform map.
 
-## Startup (every new chat)
+## Startup (every new chat and every command)
 1. READ `QANYONE_STATE.md` if it exists. It is the checkpoint: phase, auth, current TC and step.
 2. If `phase != ready` or `current_tc` is set → continue from `current_step` (see pipeline.md).
    Do not re-ask questions that were already confirmed. Exception: when the user's message is
    itself a command (`NEW TC …`, `RERUN TC …`, `STATUS`, `PUSH ADO …`, `SETUP`), mark the
    abandoned TC `status: blocked` (note "abandoned by user"), clear `current_*`, and run the
    new command instead.
-3. Then read ONLY the context file for the user's command (table below). Read `rules.md`
-   before writing any POM/spec, `formats.md` before writing any TC/registry/state file.
+3. Then READ only the context file for the user's command (table below), even if you read it
+   earlier in this chat. Read `rules.md` before writing any POM/spec, `formats.md` before
+   writing any TC/registry/state file.
 
 ## Commands
 | Command | Context file | What happens |

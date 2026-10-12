@@ -37,9 +37,12 @@
 |---|---|---|
 | Native dialog (`alert/confirm/prompt`) | script hangs forever | register `page.on('dialog', d => d.accept())` **before** the triggering action |
 | File upload | replay opens the OS file picker | `locator.setInputFiles(path)` — never click the input |
-| File download | test passes but nothing verified | `const [dl] = await Promise.all([page.waitForEvent('download'), trigger])` |
+| File download | test passes but nothing verified | `const [dl] = await Promise.all([page.waitForEvent('download'), trigger])`, then `await dl.saveAs(testInfo.outputPath(dl.suggestedFilename()))` and check the content; `.xlsx` → `readWorkbook(path)` from `helpers/excel.ts`, no Excel library |
 | iframe | "element not found" though visible | `page.frameLocator(sel).getByRole(...)` |
-| New window / popup | clicks go to the old tab | `const [popup] = await Promise.all([page.waitForEvent('popup'), trigger])` |
+| New window / popup | clicks go to the old tab | `const [popup] = await Promise.all([page.waitForEvent('popup'), trigger])`, then `new XPage(popup)` |
+| Server-side job (export, report, import) | status stays "in progress", test times out | `await expect(async () => { await refresh.click(); await expect(doneCell).toBeVisible({ timeout: 2_000 }); }).toPass({ timeout, intervals: [5_000] })` + `test.setTimeout()` sized from the duration measured in BROWSER |
+| Data table / grid | `.first()` or a count hits a header or empty row; a cell also holds a badge | data rows = `table.getByRole('row').filter({ has: page.getByRole('cell') })`; compare the cell's first line (`innerText().split('\n')[0]`) or use `toContainText` |
+| Custom checkbox / multiselect (native input hidden) | `check()` fails: element not visible | read the state from the input (`isChecked()`) and click the visible widget only when it must change (the one case a checkbox is clicked); reach the widget from its label (`getByText(label).locator('..')`) |
 | HTML5 drag & drop | `.dragTo()` runs, UI unchanged | dispatch `dragstart` / `dragover` / `drop` manually |
 | Open shadow DOM | usually fine | normal locators pierce open roots; only escalate when it really fails |
 | Closed shadow DOM | nothing can see it | BLOCKING — tell the user it needs `data-testid` from the dev team |
@@ -49,6 +52,8 @@
 - No soft assertions, no `try/catch` around locators or assertions, no `test.skip`/`test.fixme`.
 - POM classes contain no assertions; specs do.
 - Prefer `toBeVisible`, `toHaveText`, `toContainText`, `toHaveURL`, `toHaveCount`, `toBeChecked`.
+- Empty value → `toHaveText('')` on the element itself, never `toHaveCount(0)` on its children
+  (frameworks keep empty wrapper elements).
 
 ## Self-heal (max 3 rounds per test run)
 Allowed fixes
@@ -60,7 +65,8 @@ Allowed fixes
 Forbidden fixes
 - Weakening, removing or commenting out an assertion; changing an Expected to match the app.
 - Hard sleeps, soft assertions, `try/catch`, `test.skip`/`fixme`, skipping a step.
-- Increasing timeouts above 2× the default without a BROWSER-confirmed slow load.
+- Increasing timeouts above 2× the default. Only exception: a server-side job (Known-hard
+  table) whose duration you measured in BROWSER — write that duration next to `test.setTimeout`.
 
 Every run ends in an explicit state: `passing`, or after 3 failed rounds / an app bug /
 a wrong TC → `status: blocked` with the reason and the trace/screenshot path in the TC `Notes`.
@@ -72,4 +78,7 @@ assigned in the constructor; methods are business actions (`search(keyword)`, `o
 `path` is relative to `baseURL`. Register new pages in `fixtures/pages.fixture.ts`.
 Spec (`tests/<feature>/<id>-<slug>.spec.ts`): `test.describe('<id> <title>', { tag: ['@regression'] })`,
 one `test()` per TC, one `test.step('<n>. <Action>')` per TC row, data from a `const data = {...}`
-block generated from Test Data. Use the fixture (`async ({ jobsPage }) =>`), not `new JobsPage(page)`.
+block generated from Test Data. Use the fixture (`async ({ jobsPage }) =>`), not `new JobsPage(page)` —
+except a page opened in a popup / new tab: `new XPage(popup)`. A spec that creates data (a record, a
+file on the server) deletes it in `test.afterEach`, so a failed run cleans up too, unless a TC step
+already deletes it.

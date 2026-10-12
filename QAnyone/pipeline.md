@@ -3,8 +3,11 @@
 Read `rules.md` before step 5 and `formats.md` before step 2. After every step: EDIT
 `QANYONE_STATE.md` (`current_tc`, `current_step`). A new chat continues from `current_step`
 without repeating earlier questions. Several ids → run the whole pipeline per id, in order.
-NEW TC / RERUN TC start with TASKS: list the steps you will run (per test case when there are
-several) and keep the list current as each step starts and ends.
+TASKS before the first step: exactly one item per step that will run, titled `1 Intake`,
+`2 Normalize`, `3 Map`, `4 Discover`, `5 POM`, `6 Spec`, `7 Run + self-heal`, `8 Memory`,
+`9 Report` (RERUN TC or resume: only the steps left). The test case's own steps are never
+tasks. Several test cases → prefix each title with the test case id and rewrite the list when
+the next one starts. Mark an item in progress when its step starts, completed when it ends.
 
 ## NEW TC
 ### 0. Precheck (silent)
@@ -50,7 +53,9 @@ action problems, not locator problems. Then BROWSER: `browser_navigate` to the p
 + `page`), perform the preceding steps when the element only appears after an action,
 `browser_snapshot`, then `browser_generate_locator` per missing element. Repeated names → scope
 by row / container; no context in the TC → BLOCKING ask. Add rows to the TC Locators table
-with `[FROM MCP]`.
+with `[FROM MCP]`. Steps performed here can create data on the app (a record, an export): list
+each item in the TC Notes and delete it in BROWSER when done, if the app allows. Waiting for a
+server-side job: note how long it took — the spec's timeout is sized from it (rules.md).
 
 ### 5. POM (rules.md POM shape)
 WRITE / EDIT `pages/<page>.page.ts` following `pages/page.template.ts`: add locators, one

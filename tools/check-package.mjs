@@ -11,7 +11,7 @@ const REQUIRED = [
   "QAnyone/templates/playwright.config.ts", "QAnyone/templates/auth.setup.ts",
   "QAnyone/templates/base.page.ts", "QAnyone/templates/page.template.ts",
   "QAnyone/templates/login.form.page.ts", "QAnyone/templates/login.azure-ad.page.ts", "QAnyone/templates/login.google.page.ts",
-  "QAnyone/templates/pages.fixture.ts", "QAnyone/templates/env.ts", "QAnyone/templates/totp.ts",
+  "QAnyone/templates/pages.fixture.ts", "QAnyone/templates/env.ts", "QAnyone/templates/totp.ts", "QAnyone/templates/excel.ts",
   "QAnyone/templates/env.example", "QAnyone/templates/gitignore",
   "QAnyone/templates/mcp.json", "QAnyone/templates/vscode-mcp.json", "QAnyone/templates/playwright-mcp.json",
   "QAnyone/templates/claude-settings.json", "QAnyone/templates/vscode-settings.json",

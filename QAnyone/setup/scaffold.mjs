@@ -64,6 +64,7 @@ put("pages/page.template.ts", tpl("page.template.ts"));
 put("fixtures/pages.fixture.ts", tpl("pages.fixture.ts"));
 put("helpers/env.ts", tpl("env.ts"));
 put("helpers/totp.ts", tpl("totp.ts"));   // always: auth.setup.ts imports it
+put("helpers/excel.ts", tpl("excel.ts")); // .xlsx download checks; no dependency
 put("tests/auth.setup.ts", tpl("auth.setup.ts"));
 put(".gitignore", tpl("gitignore"));
 const LOGIN = { form: "login.form.page.ts", "azure-ad": "login.azure-ad.page.ts", google: "login.google.page.ts" };

@@ -6,7 +6,7 @@
   "scripts": {
     "check": "node tools/check-package.mjs",
     "test:form": "playwright test -c tools/playwright.config.ts",
-    "test:scripts": "node --import tsx --test tools/scripts.test.ts tools/totp.test.ts",
+    "test:scripts": "node --import tsx --test tools/scripts.test.ts tools/totp.test.ts tools/excel.test.ts",
     "test:scaffold": "bash tools/scaffold-smoke.sh",
     "test": "npm run check && npm run test:scripts && npm run test:install && npm run test:form && npm run test:scaffold",
     "test:install": "node --test tools/install.test.mjs tools/scaffold.test.mjs"

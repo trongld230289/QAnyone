@@ -25,7 +25,7 @@ test("form login + TOTP + ADO + firefox: all files, only the needed .env keys, p
   const r = run(dir);
   assert.equal(r.status, 0, r.stderr);
   for (const f of ["playwright.config.ts", "tsconfig.json", "pages/base.page.ts", "pages/page.template.ts", "pages/login.page.ts",
-    "fixtures/pages.fixture.ts", "helpers/env.ts", "helpers/totp.ts", "tests/auth.setup.ts", ".gitignore",
+    "fixtures/pages.fixture.ts", "helpers/env.ts", "helpers/totp.ts", "helpers/excel.ts", "tests/auth.setup.ts", ".gitignore",
     "scripts/fetch-tc.ts", "scripts/ado-writer.ts", ".mcp.json", ".vscode/mcp.json", ".vscode/settings.json", ".claude/settings.json",
     "playwright-mcp.json", ".env.example", ".env", "pom-registry/INDEX.md", "pom-registry/_shared.md", "test-cases/.gitkeep",
     "playwright/.auth/user.json"]) assert.ok(existsSync(join(dir, f)), "missing " + f);
