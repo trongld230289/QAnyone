@@ -32,7 +32,8 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      (`BASE_URL`, `AUTH_REQUIRED` and the four run flags `HEADLESS`, `TRACE`, `VIDEO`,
      `SCREENSHOT` always, with their defaults; login keys when auth ≠ none; `TOTP_SECRET` when
      totp; ADO keys when sources has ado). Prefill `BASE_URL` with `base_url`; `AUTH_REQUIRED` is
-     `true` iff auth ≠ none. `auth: none` and no ado → also WRITE `.env` with those two keys.
+     `true` iff auth ≠ none. Then WRITE `.env` with the same content (secret values left
+     empty) unless `.env` already exists. After this write, never read `.env` again.
    - WRITE `pom-registry/INDEX.md` (table header only), `pom-registry/_shared.md` (empty
      heading), `test-cases/.gitkeep`, and `playwright/.auth/user.json` containing
      `{"cookies":[],"origins":[]}` so the MCP server can start before auth exists.
@@ -40,8 +41,8 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      so the Playwright browser tools are available." Continue with step 4 after that.
    - WRITE `QANYONE_STATE.md` (formats.md §3): `phase: setup`, `auth`, `sources`, `browsers`,
      `language` from config, `auth_ready: false`, `ado_configured: false`.
-4. If auth ≠ none or sources has ado: say "Copy `.env.example` to `.env`, fill the values, then
-   type `OK`." Wait. On `OK`: never open or search `.env` (its lines would land in the
+4. If auth ≠ none or sources has ado: say "Open `.env` and fill in <the empty keys, by
+   name>, then type `OK`." Wait. On `OK`: never open or search `.env` (its lines would land in the
    transcript). RUN a check that prints key names only:
    `node -e "require('dotenv').config();const m=process.argv.slice(1).filter(k=>!process.env[k]);console.log(m.length?'missing: '+m.join(' '):'ok')" LOGIN_USERNAME LOGIN_PASSWORD`
    (list the keys this config needs). `missing:` → repeat the request, wait again.
