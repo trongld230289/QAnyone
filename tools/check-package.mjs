@@ -14,10 +14,11 @@ const REQUIRED = [
   "QAnyone/templates/pages.fixture.ts", "QAnyone/templates/env.ts", "QAnyone/templates/totp.ts",
   "QAnyone/templates/env.example", "QAnyone/templates/gitignore",
   "QAnyone/templates/mcp.json", "QAnyone/templates/vscode-mcp.json", "QAnyone/templates/playwright-mcp.json",
+  "QAnyone/templates/claude-settings.json", "QAnyone/templates/vscode-settings.json",
   "QAnyone/templates/scripts/fetch-tc.ts", "QAnyone/templates/scripts/ado-writer.ts",
 ];
 const BUDGET = {
-  "QAnyone/core.md": 11000, "QAnyone/setup.md": 10000, "QAnyone/pipeline.md": 17000,
+  "QAnyone/core.md": 11000, "QAnyone/setup.md": 11000, "QAnyone/pipeline.md": 17000,
   "QAnyone/formats.md": 9000, "QAnyone/rules.md": 9000,
 };
 const TOTAL_BUDGET = 55000;

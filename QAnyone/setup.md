@@ -24,6 +24,9 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      new pages), `T/pages.fixture.ts → fixtures/`, `T/env.ts → helpers/`, `T/totp.ts → helpers/`
      (always; auth.setup.ts imports it), `T/auth.setup.ts → tests/`, `T/gitignore → .gitignore`,
      `T/mcp.json → .mcp.json`, `T/vscode-mcp.json → .vscode/mcp.json`, `T/playwright-mcp.json → playwright-mcp.json`.
+   - IDE approvals, so the pipeline runs without a prompt per step: `T/claude-settings.json →
+     .claude/settings.json`, `T/vscode-settings.json → .vscode/settings.json`. If the file
+     exists, add only the keys it lacks (it is the user's file).
    - `auth` ≠ none → copy `T/login.<auth>.page.ts → pages/login.page.ts`
      (`form`, `azure-ad`, `google`; `okta-auth0` / `other` start from `login.form.page.ts`).
      `auth: none` → copy `T/login.form.page.ts` unchanged (auth.setup.ts imports it but skips login).
@@ -96,7 +99,8 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
      folder or file-name prefix; unsure → `misc`). Locators tagged `[FROM USER]`.
    - List specs with their describe titles in the report; do not create TC files for them.
    - WRITE `QANYONE_STATE.md` with the detected values; `tcs` empty.
-   - Missing pieces (no `setup` project, no `fixtures/pages.fixture.ts`, no `.mcp.json` /
+   - Missing pieces (no `setup` project, no `fixtures/pages.fixture.ts`, no `.claude/settings.json` /
+     `.vscode/settings.json` approvals, no `.mcp.json` /
      `.vscode/mcp.json`, no `.gitignore` entries) → list them and ask once: "Add these?
      (OK / skip)". On OK, add from templates without touching existing files.
 4. auth ≠ none and storage state missing or older than 7 days → run A.5c–d.
@@ -107,7 +111,8 @@ The framework files are already new; sync the generated files with `QAnyone/temp
 without losing anything the user or the pipeline wrote. `T` = `QAnyone/templates/`.
 1. Overwrite as-is (never hand-edited): `pages/base.page.ts`, `pages/page.template.ts`,
    `helpers/env.ts`, `helpers/totp.ts`, `scripts/*.ts` (only if present), `.mcp.json`,
-   `.vscode/mcp.json`, `playwright-mcp.json`; `.gitignore` → add missing template lines, keep extras.
+   `.vscode/mcp.json`, `playwright-mcp.json`; `.claude/settings.json` and `.vscode/settings.json`
+   → add keys the template has and the file lacks, keep the rest; `.gitignore` → add missing template lines, keep extras.
 2. Merge (keep user values): `.env.example` — add keys that the template has and the file
    lacks, with the template defaults; never remove keys. Then say which keys are new so the
    user can copy them into `.env` (never open `.env`).

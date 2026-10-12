@@ -29,6 +29,13 @@ in the chat — the AI syncs the generated config/helpers with the new templates
 values, locators and tests. `--prefer-online` matters: without it npx may reuse a cached copy of the
 package and you keep the old framework files.
 
+## Approvals
+`SETUP` writes `.claude/settings.json` (Claude Code: `acceptEdits`, the pipeline's `npm` / `npx` /
+`node` commands and the Playwright MCP tools allowed, reading `.env` denied) and
+`.vscode/settings.json` (Copilot Chat: terminal commands auto-approved, `chat.tools.global.autoApprove`
+on). So `NEW TC` runs without a prompt per step; it still stops once to confirm normalized steps for
+markdown / codegen sources, and before `PUSH ADO`. Edit those two files to tighten.
+
 ## Commands
 | Command | What it does |
 |---|---|
@@ -66,7 +73,7 @@ test-cases/ · pom-registry/ · QANYONE_STATE.md · qanyone.config.md · .env (i
 | `QAnyone/formats.md` | Test case, registry, state and config formats |
 | `QAnyone/rules.md` | Locator, action, assertion and self-heal rules |
 | `QAnyone/setup/index.html` | Offline setup form (`setup/open.mjs` opens it in the browser, prefilled on Onboard) |
-| `QAnyone/templates/` | Playwright config, auth setup, page objects, fixture, helpers, ADO scripts |
+| `QAnyone/templates/` | Playwright config, auth setup, page objects, fixture, helpers, ADO scripts, IDE approval settings |
 
 ## Development (this repo)
 `npm install` then `npm test` runs the package lint, script tests, form tests and a scaffold
