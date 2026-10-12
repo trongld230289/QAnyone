@@ -66,8 +66,9 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
    b. EDIT `pages/login.page.ts` with the discovered locators, the real login route and
       `loggedOutUrl` (the URL pattern of the login page). Record `LoginPage` in
       `pom-registry/_shared.md` with tags. Keep the URL check in `tests/auth.setup.ts` as is.
-   c. RUN `npx playwright test --project=setup` — this logs in with `LOGIN_USERNAME` /
-      `LOGIN_PASSWORD` from `.env` and saves the storage state. Fail → read the error, fix
+   c. RUN `npx playwright test --project=setup --headed` — this logs in with `LOGIN_USERNAME` /
+      `LOGIN_PASSWORD` from `.env` and saves the storage state; `--headed` so the user can watch
+      the login (later runs follow `HEADLESS` in `.env`). Fail → read the error, fix
       locator / route (max 3 rounds, rules.md Self-heal). CAPTCHA, unsupported MFA, wrong
       credentials → BLOCKING.
    d. Verify `playwright/.auth/user.json` exists and is larger than 100 bytes. EDIT state:
