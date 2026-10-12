@@ -31,7 +31,7 @@ values, locators and tests.
 ## Commands
 | Command | What it does |
 |---|---|
-| `SETUP` | First-time scaffold, import of an existing Playwright repo, or resume — auto-detected. Opens an offline HTML form for the 10 setup questions. |
+| `SETUP` | First-time scaffold, import of an existing Playwright repo, or resume — auto-detected. Opens an offline HTML form for the 8 setup questions (2 required, EN/VI). |
 | `NEW TC <ADO id>` | Fetch a test case from Azure DevOps and build the test |
 | `NEW TC <path.md>` | Normalize a free-form markdown file (one or many test cases), confirm once, build the tests |
 | `NEW TC <name>` | Record the flow with Playwright codegen, confirm the steps, build the test |

@@ -88,7 +88,6 @@ sources: [md, codegen]           # ado | md | codegen
 ado_org: ""                      # https://dev.azure.com/<org>   (only when sources has ado)
 ado_project: ""
 browsers: [chromium]             # chromium | firefox | webkit
-test_data: existing              # existing | self-create-cleanup | seed | unknown
 language: en                     # vi | en
 ---
 ## Notes
