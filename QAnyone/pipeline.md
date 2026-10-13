@@ -118,16 +118,36 @@ and trace path in Notes when blocked). EDIT `pom-registry` `Used by`. EDIT state
 clear `current_tc` / `current_step`.
 
 ### 9. Report
-```
-TC 102874 — Search job by keyword          passing · 1 heal
-steps 4 · locators 3 reused / 2 new ([FROM MCP]) · browsers chromium
-spec   tests/jobs/102874-search-job.spec.ts
-report npx playwright show-report
-```
-Blocked → the reason and what the user should check. Never say "fixed" for a blocked test.
-Then show how to run the test again without the AI (most users are not developers): the step 7
-command without `--retries` / `--reporter`, one `--project` per browser, alone in its own code
-block so its copy button copies only that line:
+Most users are not developers: show what the pipeline did, not only the result. Table headers
+and step names stay in English as below.
+1. Headline: `✅ TC 102874 — Search job by keyword · passing · 1 heal · 42 s`. Blocked →
+   `⛔ … blocked`, the reason and what the user should check; never say "fixed" for a blocked test.
+2. What each step did, one row per step that ran (RERUN TC / resume: only those); a step that
+   did nothing says why:
+
+| Step | Result |
+|---|---|
+| 1 Intake | 5 steps fetched from Azure DevOps |
+| 2 Normalize | `test-cases/102874-search-job.md`: 4 steps, 1 test data value |
+| 3 Map | 3 elements found in the registry, 2 missing |
+| 4 Discover | 2 locators found on the live page |
+| 5 POM | 1 page object created, 1 updated |
+| 6 Spec | `tests/jobs/102874-search-job.spec.ts`: 4 steps, 4 checks |
+| 7 Run + self-heal | passed on chromium after 1 fix (added a wait for the results table) |
+| 8 Memory | test case `passing`; `pom-registry/jobs.md` updated |
+| 9 Report | full report: `npx playwright show-report` |
+
+3. Every page object the spec uses: `new` (file created now), `updated` (locators added) or
+   `reused` (used as is), with where it lives and its locator counts:
+
+| Page object | File | Status | Locators |
+|---|---|---|---|
+| JobsPage | `pages/jobs.page.ts` | updated | 3 reused · 2 new |
+| SearchDialog | `pages/search-dialog.page.ts` | new | 4 new |
+
+4. How to run the test again without the AI: the step 7 command without `--retries` /
+   `--reporter`, one `--project` per browser, alone in its own code block so its copy button
+   copies only that line:
 ```
 npx playwright test 102874 --project=chromium
 ```

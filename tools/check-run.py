@@ -11,6 +11,8 @@ Reads the latest Copilot Chat session of the folder (or FILE) and checks its las
   steps     after the test case file is written, a chat message shows its Steps table
   rerun     after the last test run, a chat message has a code block holding only the
             `npx playwright test …` command (no --retries / --reporter), so the user can copy it
+  report    the chat shows a `| Step | Result |` table with a row per pipeline step and a
+            `| Page object | File | Status | Locators |` table (new / updated / reused)
 Exit code 0 when every check passes. Standard library only.
 """
 from __future__ import annotations
@@ -27,6 +29,9 @@ PIPELINE = re.compile(".*?".join(re.escape(f"{n} {name}") for n, name in enumera
 MARK = re.compile(r"Step ([1-9])\s*[·:—-]\s*([A-Za-z][A-Za-z +-]*?)\**\s*\((\d+)/(\d+) done\)([^\n]*)")
 TABLE = re.compile(r"\|\s*#\s*\|\s*Action\s*\|\s*Expected\s*\|", re.I)
 RERUN = re.compile(r"```[^\n]*\n\s*(npx playwright test [^\n`]*?)\s*\n```")
+STEP_TABLE = re.compile(r"\|\s*Step\s*\|\s*Result\s*\|", re.I)
+POM_TABLE = re.compile(r"\|\s*Page object\s*\|\s*File\s*\|\s*Status\s*\|\s*Locators\s*\|[ \t]*\n[ \t]*\|[\s:|-]+\|[ \t]*\n"
+                       r"((?:[ \t]*\|[^\n]*\|[ \t]*(?:\n|$))+)", re.I)
 WORK = ("run_in_terminal", "copilot_createFile")
 
 
@@ -133,6 +138,22 @@ def check_rerun(turn) -> tuple[bool, str]:
     return False, "no code block holding only the npx playwright test command after the last run"
 
 
+def check_report(turn) -> tuple[bool, str]:
+    # file references are separate chat parts, so a table can be split over several text events
+    text = "".join(str(v) for k, v in turn if k == "text")
+    head = STEP_TABLE.search(text)
+    if not head:
+        return False, "no '| Step | Result |' table"
+    missing = [f"{n} {name}" for n, name in enumerate(NAMES, 1)
+               if not re.search(rf"\|\s*\**{n} {re.escape(name)}\**\s*\|", text[head.end():])]
+    if missing:
+        return False, f"step table has no row for: {', '.join(missing)}"
+    pom = POM_TABLE.search(text)
+    if not pom or not re.search(r"\b(new|updated|reused)\b", pom[1], re.I):
+        return False, "no '| Page object | File | Status | Locators |' table with new / updated / reused rows"
+    return True, "step table with 9 rows and page object table shown"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("project", nargs="?", default=".", help="test project folder (default: cwd)")
@@ -153,7 +174,8 @@ def main() -> int:
         return 2
     print(f"{prompt.strip()}  ({session.name})")
     ok = True
-    for name, check in (("progress", check_progress), ("steps", check_steps), ("rerun", check_rerun)):
+    for name, check in (("progress", check_progress), ("steps", check_steps), ("rerun", check_rerun),
+                        ("report", check_report)):
         passed, why = check(turn)
         ok &= passed
         print(f"{'PASS' if passed else 'FAIL'} {name:<8} {why}")
