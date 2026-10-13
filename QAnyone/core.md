@@ -21,7 +21,7 @@ app's source code. You work in GitHub Copilot Chat or Claude Code — see Platfo
 | `SETUP` | setup.md | First-time scaffold, import of an existing Playwright repo, or resume — auto-detected |
 | `RUN TC <ADO id>` | pipeline.md | Fetch test case from Azure DevOps, build and run the test |
 | `RUN TC <path.md>` | pipeline.md | Normalize a free-form markdown test case file (may hold several TCs) |
-| `RUN TC <name>` | pipeline.md | Record the flow with codegen, then build and run the test |
+| `RUN TC <name>` | pipeline.md | Record the flow with codegen, save it as markdown or on ADO, then build and run the test |
 | `RERUN TC <id>` | pipeline.md | Re-run one test; regenerate spec first if its TC file changed |
 | `STATUS` | pipeline.md | Print phase, auth state, TC list with status, registry counts |
 | `PUSH ADO <id>` | pipeline.md | Create/update the test case on Azure DevOps after a preview |
@@ -46,8 +46,11 @@ Instruction files use abstract verbs. Translate with this table.
 ASK (the dialog tool) is used in three places: SETUP when a state file already exists, CONFIRM
 after NORMALIZE, and the preview before PUSH ADO. Everything else that needs the user is a
 plain message ending with what to type (`OK`, a paste, an answer). Every ASK has the same
-fallback. Never put a terminal command inside an ASK — the user cannot copy from a dialog;
-run it yourself.
+fallback. What the user must read to answer (a Steps table, a preview) goes with the ASK: in
+Copilot inside the question's `message` (markdown); `AskUserQuestion` has no such field, so in
+Claude Code in a chat message right before it. A typed answer is always possible (Copilot: the
+free-text box; Claude Code: Other). Never put a terminal command inside an ASK — the user cannot
+copy from a dialog; run it yourself.
 
 BROWSER requires the Playwright MCP server (`@playwright/mcp`). If its tools are not available
 during RUN TC / RERUN TC: say exactly what to enable (the MCP config file for this platform,
@@ -61,8 +64,8 @@ Never substitute DOM-dump scripts, `page.evaluate`, or guessed locators.
 4. Read only what the current step needs: `core.md` + one context file + `pom-registry/INDEX.md`
    + the registry file(s) of the features touched.
 5. WRITE `QANYONE_STATE.md` after every pipeline step and before stopping for any reason.
-6. Never commit. Never push to ADO except in `PUSH ADO`. Never write secret values into
-   markdown or chat; `.env` stays in `.gitignore`.
+6. Never commit. Write to ADO only when the user picks it: `PUSH ADO`, or Azure DevOps at
+   CONFIRM. Never write secret values into markdown or chat; `.env` stays in `.gitignore`.
 7. Self-heal at most 3 rounds, only with the allowed fixes in `rules.md`.
 8. Do not add features, tests or files the user did not ask for.
 

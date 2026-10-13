@@ -45,7 +45,7 @@ markdown / codegen sources, and before `PUSH ADO`. Edit those two files to tight
 | `SETUP` | First-time scaffold, import of an existing Playwright repo, or resume — auto-detected. Opens an offline HTML form for the 8 setup questions (2 required, EN/VI). |
 | `RUN TC <ADO id>` | Fetch a test case from Azure DevOps and build the test |
 | `RUN TC <path.md>` | Normalize a free-form markdown file (one or many test cases), confirm once, build the tests |
-| `RUN TC <name>` | Record the flow with Playwright codegen, confirm the steps, build the test |
+| `RUN TC <name>` | Record the flow with Playwright codegen, confirm the steps, save them as markdown or on Azure DevOps, build the test |
 | `RERUN TC <id>` | Re-run one test (regenerates the spec if its test case file changed) |
 | `STATUS` | Phase, auth state, test cases and page-object registry |
 | `PUSH ADO <id>` | Create or update the test case in Azure DevOps after a preview |

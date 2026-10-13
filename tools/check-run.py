@@ -2,18 +2,24 @@
 """Check the last RUN TC run of a QAnyone test project against the pipeline (dev eval, not shipped).
 
 Usage: python tools/check-run.py [project_dir] [--session FILE]
-Reads the latest Copilot Chat session of the folder (or FILE) and checks its last `RUN TC` turn
-(`NEW TC`, the old name, counts too):
+Reads the latest Copilot Chat session of the folder (or FILE) and checks its last `RUN TC` run
+(`NEW TC`, the old name, counts too), up to the next command; the user's answers in between (a
+recorded paste, a dialog) are part of the run:
   progress  a chat message lists the pipeline steps 1 Intake … 9 Report before any work
             (command, file creation, browser); then each step starts with a line
             `Step <n> · <name> (<done>/9 done) — left: …` in order, counts right, `left` naming
             the next step
-  steps     after the test case file is written, a chat message shows its Steps table
+  steps     after the test case file is written, its Steps table is shown before the user is
+            asked to confirm: in a chat message, or in the confirm dialog's message
+  save      a recorded test case (`RUN TC <name>`) in a project with `ado_configured: true`:
+            the confirm dialog offers a markdown file and Azure DevOps
   rerun     after the last test run, a chat message has a code block holding only the
             `npx playwright test …` command (no --retries / --reporter), so the user can copy it
   report    the chat shows a `| Step | Result |` table with a row per pipeline step and a
             `| Page object | File | Status | Locators |` table (new / updated / reused)
-Exit code 0 when every check passes. Standard library only.
+The dialog's arguments come from the transcript next to the session file
+(`GitHub.copilot-chat/transcripts/<session>.jsonl`); the session file does not keep them.
+Exit code 0 when every check passes (SKIP counts as passing). Standard library only.
 """
 from __future__ import annotations
 
@@ -33,6 +39,9 @@ STEP_TABLE = re.compile(r"\|\s*Step\s*\|\s*Result\s*\|", re.I)
 POM_TABLE = re.compile(r"\|\s*Page object\s*\|\s*File\s*\|\s*Status\s*\|\s*Locators\s*\|[ \t]*\n[ \t]*\|[\s:|-]+\|[ \t]*\n"
                        r"((?:[ \t]*\|[^\n]*\|[ \t]*(?:\n|$))+)", re.I)
 WORK = ("run_in_terminal", "copilot_createFile")
+COMMANDS = ("RUN TC", "NEW TC", "RERUN TC", "STATUS", "PUSH ADO", "SETUP", "UPDATE")
+ASK = "askQuestions"
+RECORDING = re.compile(r"(RUN|NEW) TC\s+(?![\d\s]+$)(?!.*\.md\s*$)\S", re.I)
 
 
 def collect_debug():
@@ -82,13 +91,41 @@ def events(path: Path) -> list[tuple[str, object]]:
     return [(kind, tools[val] if kind == "tool" else val) for kind, val in order]
 
 
+def dialog_args(session: Path) -> dict:
+    """toolCallId -> arguments of every dialog call, from the transcript next to the session."""
+    path = session.parent.parent / "GitHub.copilot-chat" / "transcripts" / f"{session.stem}.jsonl"
+    found: dict = {}
+    for line in path.read_text("utf-8", errors="replace").splitlines() if path.exists() else []:
+        try:
+            o = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        d = o.get("data") if isinstance(o, dict) else None
+        if isinstance(d, dict) and o.get("type") == "tool.execution_start" and ASK in str(d.get("toolName")):
+            found[d.get("toolCallId")] = d.get("arguments") or {}
+    return found
+
+
+def dialog(call, asks: dict) -> tuple[str, list[str]]:
+    """Question + message text and option labels of a dialog call."""
+    qs = (asks.get(call.get("toolCallId")) or {}).get("questions") or []
+    text = "\n".join(f"{q.get('question', '')}\n{q.get('message', '')}" for q in qs)
+    return text, [o.get("label", "") for q in qs for o in q.get("options") or []]
+
+
 def last_new_tc(evts: list[tuple[str, object]]):
     starts = [i for i, (k, v) in enumerate(evts) if k == "user" and str(v).strip().upper().startswith(("RUN TC", "NEW TC"))]
     if not starts:
         return None, []
     s = starts[-1]
-    e = next((i for i in range(s + 1, len(evts)) if evts[i][0] == "user"), len(evts))
+    e = next((i for i in range(s + 1, len(evts)) if evts[i][0] == "user" and
+              str(evts[i][1]).strip().upper().startswith(COMMANDS)), len(evts))
     return evts[s][1], evts[s + 1 : e]
+
+
+def tc_written(turn) -> int | None:
+    return next((i for i, (k, c) in enumerate(turn) if k == "tool" and c["toolId"].startswith("copilot_") and
+                 "createFile" in c["toolId"] and "test-cases/" in json.dumps(c, ensure_ascii=False)), None)
 
 
 def check_progress(turn) -> tuple[bool, str]:
@@ -116,14 +153,34 @@ def check_progress(turn) -> tuple[bool, str]:
     return True, f"pipeline listed first; step lines {nums} with counts and 'left'"
 
 
-def check_steps(turn) -> tuple[bool, str]:
-    written = next((i for i, (k, c) in enumerate(turn) if k == "tool" and c["toolId"].startswith("copilot_") and
-                    "createFile" in c["toolId"] and "test-cases/" in json.dumps(c, ensure_ascii=False)), None)
+def check_steps(turn, asks: dict) -> tuple[bool, str]:
+    written = tc_written(turn)
     if written is None:
-        return False, "no test case file written in this turn"
-    if any(k == "text" and TABLE.search(str(v)) for k, v in turn[written:]):
-        return True, "Steps table shown in chat"
-    return False, "no chat message with the Steps table after the test case file was written"
+        return False, "no test case file written in this run"
+    for k, v in turn[written:]:
+        if k == "text" and TABLE.search(str(v)):
+            return True, "Steps table shown in chat"
+        if k == "tool" and ASK in v["toolId"]:
+            if TABLE.search(dialog(v, asks)[0]):
+                return True, "Steps table shown in the confirm dialog"
+            known = "" if v.get("toolCallId") in asks else " (its arguments are not in the transcript)"
+            return False, f"the confirm dialog came without the Steps table, in chat or in its message{known}"
+    return False, "no Steps table in chat after the test case file was written"
+
+
+def check_save(prompt: str, turn, asks: dict, ado: bool) -> tuple[bool | None, str]:
+    if not RECORDING.match(prompt.strip()):
+        return None, "not a recorded test case"
+    if not ado:
+        return None, "ado_configured is not true in QANYONE_STATE.md"
+    written = tc_written(turn)
+    ask = next((v for k, v in turn[written or 0:] if k == "tool" and ASK in v["toolId"]), None)
+    if written is None or ask is None:
+        return False, "no confirm dialog after the test case file was written"
+    labels = dialog(ask, asks)[1]
+    if any(re.search(r"markdown", l, re.I) for l in labels) and any(re.search(r"azure devops|\bADO\b", l, re.I) for l in labels):
+        return True, f"confirm dialog offers: {' / '.join(labels)}"
+    return False, f"confirm dialog offers no markdown / Azure DevOps choice: {' / '.join(labels) or '(no options found)'}"
 
 
 def check_rerun(turn) -> tuple[bool, str]:
@@ -173,12 +230,16 @@ def main() -> int:
         print(f"no RUN TC turn in {session.name}")
         return 2
     print(f"{prompt.strip()}  ({session.name})")
+    asks = dialog_args(session)
+    state = Path(a.project) / "QANYONE_STATE.md"
+    ado = state.exists() and re.search(r"^ado_configured:\s*true\b", state.read_text("utf-8", errors="replace"), re.M) is not None
     ok = True
-    for name, check in (("progress", check_progress), ("steps", check_steps), ("rerun", check_rerun),
+    for name, check in (("progress", check_progress), ("steps", lambda t: check_steps(t, asks)),
+                        ("save", lambda t: check_save(prompt, t, asks, ado)), ("rerun", check_rerun),
                         ("report", check_report)):
         passed, why = check(turn)
-        ok &= passed
-        print(f"{'PASS' if passed else 'FAIL'} {name:<8} {why}")
+        ok &= passed is not False
+        print(f"{'SKIP' if passed is None else 'PASS' if passed else 'FAIL'} {name:<8} {why}")
     return 0 if ok else 1
 
 

@@ -8,4 +8,5 @@ for every command, even if you read them earlier in this chat: `npx … update` 
 long chats drop earlier reads.
 
 - Never edit files under `QAnyone/` — they are the framework.
-- Never commit, never push to Azure DevOps, never print secret values.
+- Never commit, never print secret values. Write to Azure DevOps only when the user picks it in
+  a QAnyone dialog.

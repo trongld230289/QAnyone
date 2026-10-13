@@ -50,11 +50,21 @@ exists in `test-cases/` is a collision → take the next free number and say so)
 path or the page named in step 1), tags, `status: draft`. Rewrite steps with the fixed verbs,
 quoted element names, `{{key}}` data, `[Pre]` first row; move repeated literals into Test Data.
 Text language per state `language`.
-Right after writing, send a chat message with the Steps and Test Data tables of every file just
-written (every source), before any tool call of step 3: this is where the user reads the test case.
-CONFIRM (sources `md` and `codegen` only): then ASK "Confirm these steps?" with the options
-`OK` / `I edited the file(s), re-read them`. Repeat until OK. Then `status: confirmed`.
-ADO source: no ASK; set `confirmed` directly and continue.
+Right after writing, show the Steps and Test Data tables of every file just written (every
+source), before any tool call of step 3: this is where the user reads the test case. ADO source:
+show them in a chat message, set `confirmed` and continue.
+CONFIRM (sources `md` and `codegen`): ASK "Confirm these steps?" with the tables inside the ASK
+(core.md Platform map) and the options `OK` / `I edited the file(s), re-read them`. Source
+`codegen` with `ado_configured: true` asks instead "Save this test case as a markdown file only,
+or on Azure DevOps too?" with `Markdown file only` / `New Azure DevOps test case` / `Update an
+Azure DevOps test case` (its id typed with it, or ask for it) / `I edited the file, re-read it`.
+Edited → re-read, show the tables again in a new ASK. Then `status: confirmed`.
+- New → RUN `npx tsx scripts/ado-writer.ts create --from <tc file>`.
+- Update → RUN `npx tsx scripts/ado-writer.ts update --tc <ado id> --from <tc file>`.
+Both print `{ "id": … }`; the test case takes that id: rename the file to
+`test-cases/<id>-<slug>.md` (when `test-cases/<id>-*.md` exists, write into it and delete the new
+one), set `id`, `source_ref: ado:<id>` and `current_tc`, and give the work-item URL
+`<ado_org>/<project>/_workitems/edit/<id>`. A failed call → say why and ASK again.
 
 ### 3. Map
 READ `pom-registry/INDEX.md`, the `<feature>.md` of the TC, and `_shared.md` when the steps
@@ -160,9 +170,9 @@ READ the TC file. If it is newer than the spec, or `status: draft` → run steps
 Then steps 7–9.
 
 ## PUSH ADO <id>
-Requires `ado_configured: true`. READ the TC file. Print the Steps table as it will appear in
-ADO (row 1 precondition, rows 2+ action / expected, `{{key}}` replaced by Test Data values).
-ASK "Push to Azure DevOps?" with the options `Update existing TC <id>` (when source is ado or
+Requires `ado_configured: true`. READ the TC file. Show the Steps table as it will appear in ADO
+(row 1 precondition, rows 2+ action / expected, `{{key}}` replaced by Test Data values) inside
+the ASK "Push to Azure DevOps?" with the options `Update existing TC <id>` (when source is ado or
 the id is numeric) · `Create new test case` (free text for an optional User Story id) · `Cancel`.
 - Update → RUN `npx tsx scripts/ado-writer.ts update --tc <id> --from test-cases/<id>-<slug>.md`
   (the script reads Steps + Test Data and substitutes `{{key}}`; the `[Pre]` row goes first).
