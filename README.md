@@ -25,10 +25,12 @@ replace only that block.
 Manual alternative: copy `QAnyone/` into the repo and paste the contents of the package's `CLAUDE.md`
 into your own `CLAUDE.md` / `.github/copilot-instructions.md`.
 
-**Update an existing project:** `npx --prefer-online github:trongld230289/QAnyone update` then type `UPDATE`
+**Update an existing project:** `npx github:trongld230289/QAnyone update` then type `UPDATE`
 in the chat — the AI syncs the generated config/helpers with the new templates and keeps your
-values, locators and tests. `--prefer-online` matters: without it npx may reuse a cached copy of the
-package and you keep the old framework files.
+values, locators and tests. The installer deletes its npx cache copy after every run, so each run
+downloads the latest version. If `update` still brings old files (a copy cached by an older
+installer), delete the npx cache once: `Remove-Item -Recurse -Force "$env:LOCALAPPDATA\npm-cache\_npx"`
+(Windows PowerShell) or `rm -rf ~/.npm/_npx` (macOS / Linux).
 
 ## Approvals
 `SETUP` writes `.claude/settings.json` (Claude Code: `acceptEdits`, the pipeline's `npm` / `npx` /

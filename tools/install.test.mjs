@@ -116,3 +116,38 @@ test("init seeds MCP config, approvals and an empty storage state; update keeps 
   assert.match(u.stdout, /\.mcp\.json: kept/);
   rmSync(dir, { recursive: true, force: true });
 });
+
+// A copy of the package laid out where npx installs it (`<cache>/_npx/<hash>/node_modules/<pkg>`).
+function packageCopy(base) {
+  const { cpSync } = require("node:fs");
+  const pkg = join(base, "node_modules", "qanyone-dev");
+  for (const f of ["bin", "QAnyone", "CLAUDE.md", ".github/copilot-instructions.md", "package.json"]) {
+    cpSync(join(ROOT, f), join(pkg, f), { recursive: true });
+  }
+  return join(pkg, "bin", "qanyone.mjs");
+}
+
+test("run from the npx cache, the installer deletes that cache entry so the next npx run downloads the latest", () => {
+  const tmp = mkdtempSync(join(tmpdir(), "qanyone-npx-"));
+  const entry = join(tmp, "_npx", "0123456789abcdef");
+  const bin = packageCopy(entry);
+  const dir = join(tmp, "project");
+  for (const args of [["init", dir], ["update", dir], ["--help"]]) {
+    const bin2 = existsSync(bin) ? bin : packageCopy(entry);
+    const r = spawnSync(process.execPath, [bin2, ...args], { encoding: "utf8" });
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(!existsSync(entry), `npx cache entry still there after ${args[0]}`);
+  }
+  assert.ok(existsSync(join(dir, "QAnyone", "core.md")));
+  rmSync(tmp, { recursive: true, force: true });
+});
+
+test("run from anywhere else, the installer deletes nothing", () => {
+  const tmp = mkdtempSync(join(tmpdir(), "qanyone-local-"));
+  const bin = packageCopy(join(tmp, "plain"));
+  const r = spawnSync(process.execPath, [bin, "init", join(tmp, "project")], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+  assert.ok(existsSync(bin));
+  assert.ok(existsSync(BIN));
+  rmSync(tmp, { recursive: true, force: true });
+});

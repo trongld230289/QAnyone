@@ -2,11 +2,25 @@
 // QAnyone installer:
 //   npx github:trongld230289/QAnyone init   [dir] [--force]   first install
 //   npx github:trongld230289/QAnyone update [dir]             refresh framework files
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+// npx keeps reusing the commit it cached on the first run of a `github:` spec, even with
+// --prefer-online, so every later update would reinstall the same old files. When running from
+// the npx cache (<cache>/_npx/<hash>/node_modules/<pkg>), delete that entry on exit: the next
+// `npx github:…` run downloads the current branch again.
+const NPX_ENTRY = /^(.*[\\/]_npx[\\/][0-9a-f]{8,64})[\\/]node_modules[\\/]/i.exec(PKG_ROOT + "/")?.[1];
+process.on("exit", () => {
+  if (!NPX_ENTRY) return;
+  try {
+    rmSync(NPX_ENTRY, { recursive: true, force: true });
+  } catch {
+    console.log(`Could not clear the npx cache ${NPX_ENTRY}; delete it so the next run gets the latest QAnyone.`);
+  }
+});
 // Instruction files are merged: an existing CLAUDE.md / copilot-instructions.md keeps its
 // own content and gets the QAnyone block between markers; update replaces only that block.
 const POINTERS = ["CLAUDE.md", ".github/copilot-instructions.md"];
