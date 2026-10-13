@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>QAnyone Setup</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMyREQ0RUMiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3QzVDRkYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0iIzBCMTIyMCIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzIgMzMpIHNjYWxlKC44NCkgdHJhbnNsYXRlKC0zMiAtMzIpIj48cGF0aCBkPSJNNTYuNDMgMjMuMTEgQTI2IDI2IDAgMSAxIDM2LjUxIDYuNCBNMjkuNzMgMTAuMjkgTDM2LjUxIDYuNCBMMzEuNDcgMC40MyIgc3Ryb2tlPSJ1cmwoI2cpIiBzdHJva2Utd2lkdGg9IjQuNSIvPjxwYXRoIGQ9Ik0xOSAxOCBMMzIgNDkgTDQ1IDE4IE0yNC41IDI4IEgzOS41IiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iNSIvPjxwYXRoIGQ9Ik0xOSA0NiBMMzIgMTUgTDQ1IDQ2IE0yNC41IDM2IEgzOS41IiBzdHJva2U9IiNFOEVFRjYiIHN0cm9rZS13aWR0aD0iNSIvPjwvZz48L3N2Zz4=">
+<style>
+  /* one surface for the whole page: the workbench. Developer tool → dark only (no light/dark split). */
+  :root {
+    --bg:#0B1220; --fg:#E8EEF6; --muted:#8DA1BD; --line:#223049; --field:#0F1829; --soft:rgba(45,212,236,.13);
+    --accent:#2DD4EC; --accent-ink:#06202A; --warn:#F5A524; --warn-soft:rgba(245,165,36,.16);
+    --cv:#0B1220; --cv-line:#223049; --cv-dot:#1F2C44; --cv-node:#121C2E; --cv-edge:#2B3B55;
+    --cv-fg:#E8EEF6; --cv-muted:#8DA1BD; --glow:#2DD4EC; --glow-ink:#06202A; --cv-warn:#F5A524;
+  }
+  html { color-scheme:dark; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:calc(var(--hdr) + 24px); }
+  :root { --hdr:76px; }
+  body { margin:0; padding:0 20px 64px; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; position:relative; }
+  /* backdrop: fine grid that fades out + two slow aurora blobs (teal / violet) — the "neural" feel; fixed so it stays while scrolling */
+  .bg { position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+  .bg .grid { position:absolute; inset:0; background:
+      linear-gradient(rgba(141,161,189,.07) 1px, transparent 1px) 0 0 / 44px 44px,
+      linear-gradient(90deg, rgba(141,161,189,.07) 1px, transparent 1px) 0 0 / 44px 44px;
+    mask-image:radial-gradient(ellipse 80% 70% at 50% 0%, #000 20%, transparent 100%); -webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 0%, #000 20%, transparent 100%); }
+  .bg .blob { position:absolute; width:900px; height:900px; border-radius:50%; filter:blur(90px); opacity:.55; will-change:transform; }
+  .bg .b1 { left:-340px; top:-460px; width:1100px; height:1100px; opacity:.75; background:radial-gradient(circle, rgba(45,212,236,.6), rgba(45,212,236,0) 62%); animation:drift1 38s ease-in-out infinite alternate; }
+  .bg .b2 { right:-400px; bottom:-480px; width:1100px; height:1100px; opacity:.7; background:radial-gradient(circle, rgba(124,92,255,.6), rgba(124,92,255,0) 62%); animation:drift2 46s ease-in-out infinite alternate; }
+  .bg .b3 { left:38%; top:22%; width:700px; height:700px; opacity:.28; background:radial-gradient(circle, rgba(45,212,236,.45), rgba(45,212,236,0) 62%); animation:drift1 52s ease-in-out infinite alternate-reverse; }
+  .bg .b4 { right:8%; top:-260px; width:620px; height:620px; opacity:.32; background:radial-gradient(circle, rgba(236,72,153,.5), rgba(236,72,153,0) 62%); animation:drift2 58s ease-in-out infinite alternate-reverse; }
+  /* perspective floor: a grid rushing toward the viewer, very faint, fades into the page */
+  .bg .floor { position:absolute; left:-25%; right:-25%; bottom:-6%; height:48%; background:
+      linear-gradient(rgba(45,212,236,.22) 1.5px, transparent 1.5px) 0 0 / 72px 72px,
+      linear-gradient(90deg, rgba(45,212,236,.16) 1.5px, transparent 1.5px) 0 0 / 72px 72px;
+    transform:perspective(620px) rotateX(64deg); transform-origin:50% 100%;
+    mask-image:linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 78%); -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 78%);
+    animation:floor 9s linear infinite; }
+  @keyframes floor { to { background-position:0 72px, 0 0; } }
+  .bg .stars { position:absolute; inset:0; background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(232,238,246,.5) 50%, transparent 51%),
+      radial-gradient(1px 1px at 67% 9%, rgba(232,238,246,.4) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 83% 41%, rgba(45,212,236,.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 28% 72%, rgba(232,238,246,.35) 50%, transparent 51%),
+      radial-gradient(1px 1px at 51% 55%, rgba(232,238,246,.3) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 92% 78%, rgba(124,92,255,.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 7% 88%, rgba(232,238,246,.35) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 12%, rgba(45,212,236,.5) 50%, transparent 51%); }
+  @keyframes drift1 { to { transform:translate(180px, 120px) scale(1.12); } }
+  @keyframes drift2 { to { transform:translate(-160px, -140px) scale(1.08); } }
+  .bg .stars { animation:twinkle 4s ease-in-out infinite alternate; }
+  @keyframes twinkle { from { opacity:.45; } to { opacity:1; } }
+  @media (prefers-reduced-motion: reduce) { .bg .blob, .bg .floor, .bg .stars { animation:none; } }
+  code { font:12.5px/1 ui-monospace, "Cascadia Mono", Consolas, monospace; background:color-mix(in srgb, var(--fg) 9%, transparent); padding:2px 5px; border-radius:4px; }
+  .shell { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) 420px; gap:28px 56px; }
+
+  /* ---- header ---- */
+  /* full-bleed sticky header: same material as the backdrop, fades into it; a glowing hairline instead of a box edge */
+  header { position:sticky; top:0; z-index:10; margin:0 -20px 20px; padding:0 20px; background:linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, transparent), color-mix(in srgb, var(--bg) 70%, transparent)); backdrop-filter:blur(14px) saturate(1.3); -webkit-backdrop-filter:blur(14px) saturate(1.3); }
+  header::after { content:""; position:absolute; left:0; right:0; bottom:0; height:1px; background:linear-gradient(90deg, transparent, rgba(45,212,236,.55) 25%, rgba(124,92,255,.45) 75%, transparent); }
+  .hwrap { max-width:1200px; margin:0 auto; min-height:var(--hdr); display:flex; align-items:center; justify-content:space-between; gap:12px 28px; padding:12px 0; }
+  .brand { min-width:0; display:flex; align-items:center; gap:12px; }
+  .mark { width:38px; height:38px; flex:none; border-radius:11px; background:linear-gradient(145deg, #15324A, #0B1220); border:1px solid color-mix(in srgb, var(--glow) 35%, var(--line)); box-shadow:0 0 18px rgba(45,212,236,.25), inset 0 0 0 1px rgba(255,255,255,.03); display:grid; place-items:center; }
+  .mark svg { width:30px; height:30px; filter:drop-shadow(0 0 4px rgba(45,212,236,.5)); }
+  ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background:#223049; border-radius:5px; border:2px solid var(--bg); } ::-webkit-scrollbar-track { background:transparent; }
+  h1 { font-size:24px; line-height:1.1; letter-spacing:-0.03em; margin:0; font-weight:700; white-space:nowrap; }
+  h1 .setup { color:var(--muted); font-weight:500; }
+  p.lead { color:var(--muted); margin:3px 0 0; font-size:13px; white-space:nowrap; }
+  .intro { grid-column:1 / -1; color:var(--muted); margin:8px 0 0; }
+  .steps { display:flex; align-items:center; gap:6px; margin-left:auto; }
+  .steps a { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:600; color:var(--muted); border:1.5px solid var(--line); text-decoration:none; transition:all .2s; }
+  .steps a:hover { border-color:var(--accent); color:var(--fg); }
+  .steps a.done { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .steps a.missing { border-color:var(--warn); color:var(--warn); }
+  .steps a.cur { box-shadow:0 0 0 3px var(--soft); border-color:var(--accent); }
+  .steps a.hidden { display:none; }
+  .steps a.opt { border-style:dashed; opacity:.6; }
+  .steps a.opt.done { opacity:1; border-style:solid; }
+  .lang { display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .lang button { padding:6px 10px; border:0; border-radius:0; background:transparent; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; }
+  .lang button + button { border-left:1px solid var(--line); }
+  .lang button.on { background:var(--accent); color:var(--accent-ink); }
+  .progress { min-width:200px; text-align:right; }
+  .progress .txt { font:12.5px ui-monospace, "Cascadia Mono", Consolas, monospace; color:var(--muted); margin-bottom:6px; }
+  .progress .bar { height:4px; border-radius:2px; background:var(--line); overflow:hidden; }
+  .progress .bar i { display:block; height:100%; width:0; background:var(--accent); border-radius:2px; transition:width .4s cubic-bezier(.2,.8,.2,1); }
+
+  /* ---- the question rail ---- */
+  form { min-width:0; position:relative; padding-left:56px; }
+  fieldset { position:relative; border:0; padding:0 0 34px; margin:0; min-width:0; }
+  fieldset::before { content:""; position:absolute; left:-42px; top:30px; bottom:-2px; width:2px; background:var(--line); transition:background .3s; }
+  fieldset:last-of-type::before { display:none; }
+  fieldset.done::before { background:var(--accent); }
+  legend { float:left; width:100%; padding:0; margin:0 0 10px; font-size:17px; font-weight:600; letter-spacing:-0.01em; }
+  legend + * { clear:both; }
+  .n { position:absolute; left:-56px; top:-1px; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:13px; font-weight:600; color:var(--muted); background:var(--bg); border:2px solid var(--line); transition:all .25s; z-index:1; }
+  fieldset.done .n { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  fieldset.done .n::before { content:"✓"; font-size:14px; }
+  fieldset.done .n span { display:none; }
+  fieldset.missing .n { color:var(--warn); border-color:var(--warn); }
+  fieldset.missing legend { color:var(--warn); }
+  fieldset.flash .n { box-shadow:0 0 0 6px var(--soft); }
+  .req { color:var(--warn); font-weight:700; margin-left:3px; }
+
+  label { display:block; margin:0 0 2px; padding:7px 12px; border-radius:8px; transition:background .15s; }
+  /* control | text: an 18px column for the ring, the text wraps in the second column (hanging indent) */
+  label:has(> input[type=radio]), label:has(> input[type=checkbox]) { display:grid; grid-template-columns:18px minmax(0, 1fr); column-gap:10px; align-items:start; cursor:pointer; }
+  label:has(> input[type=radio]:not(:disabled)):hover, label:has(> input[type=checkbox]:not(:disabled)):hover { background:color-mix(in srgb, var(--fg) 4%, transparent); }
+  label:has(> input:checked:not(:disabled)) { background:var(--soft); }
+  /* custom controls: a ring that lights up teal, with a glow on the chosen one */
+  label > input[type=radio], label > input[type=checkbox] { appearance:none; -webkit-appearance:none; width:18px; height:18px; line-height:inherit; margin:2px 0 0; margin-top:calc((1lh - 18px) / 2); display:grid; place-content:center; border:1.5px solid var(--cv-edge); background:var(--field); cursor:pointer; position:relative; transition:border-color .15s, background .15s, box-shadow .2s; }
+  label > input[type=radio] { border-radius:50%; }
+  label > input[type=checkbox] { border-radius:5px; }
+  label > input:hover:not(:disabled) { border-color:var(--accent); }
+  label > input:checked { border-color:var(--accent); background:var(--accent); box-shadow:0 0 0 3px var(--soft), 0 0 12px rgba(45,212,236,.45); }
+  label > input[type=radio]:checked::after { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent-ink); }
+  /* centred by the grid; nudged up 1px because a tick's visual weight sits low */
+  label > input[type=checkbox]:checked::after { content:""; box-sizing:border-box; width:5px; height:9px; margin-top:-2px; border:solid var(--accent-ink); border-width:0 2px 2px 0; transform:rotate(45deg); }
+  label > input:focus-visible { outline:2px solid var(--fg); outline-offset:2px; }
+  label > input:disabled { cursor:default; opacity:.55; box-shadow:none; }
+  label:has(> input:disabled) { color:var(--muted); }
+  input[type=text], textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--field); color:var(--fg); font:inherit; transition:border-color .15s, box-shadow .15s; }
+  input[type=text]:focus, textarea:focus { outline:0; border-color:var(--accent); box-shadow:0 0 0 3px var(--soft); }
+  input[type=text].invalid { border-color:var(--warn); box-shadow:0 0 0 3px var(--warn-soft); }
+  label > input[type=text] { width:auto; min-width:240px; }
+  /* "other: describe" — a third column: the text box takes the rest of the row */
+  label:has(> #auth_other) { grid-template-columns:18px max-content minmax(0, 1fr); align-items:center; }
+  label:has(> #auth_other) > input[type=radio] { margin-top:0; }
+  label:has(> #auth_other) > span { white-space:nowrap; }
+  label > #auth_other { width:100%; min-width:0; }
+  /* label + input rows that share one label column, so the inputs line up */
+  .fields { display:grid; grid-template-columns:max-content minmax(0, 1fr); gap:10px 12px; align-items:center; padding:4px 12px; }
+  .fields label { display:block; margin:0; padding:0; }
+  .fields input[type=text] { width:100%; min-width:0; }
+  @media (max-width: 560px) { .fields { grid-template-columns:1fr; gap:4px 0; } .fields input[type=text] { margin-bottom:8px; } }
+  .hint { color:var(--muted); font-size:13px; }
+  button { padding:10px 18px; border:1px solid var(--accent); border-radius:8px; background:var(--accent); color:var(--accent-ink); cursor:pointer; font:inherit; font-weight:600; }
+  button.secondary { background:transparent; color:var(--accent); }
+  button:focus-visible { outline:2px solid var(--fg); outline-offset:2px; }
+  .qa { display:grid; grid-template-columns:1fr 1fr auto; gap:8px; margin:6px 0; }
+  .qa button { padding:8px 12px; }
+  .hidden { display:none; }
+
+  /* ---- output block ---- */
+  .actions { display:flex; align-items:center; gap:14px; margin:4px 0 18px; }
+  .code { border-radius:12px; overflow:hidden; background:var(--field); border:1px solid var(--line); }
+  .code-h { display:flex; align-items:center; gap:12px; padding:10px 12px 10px 16px; border-bottom:1px solid var(--line); color:var(--cv-muted); font:12.5px ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .code-h .name { color:var(--cv-fg); }
+  .code-h #copied { margin-left:auto; font:13px system-ui, sans-serif; color:var(--glow); }
+  .code-h button { background:transparent; border-color:var(--cv-edge); color:var(--cv-fg); padding:6px 12px; font-size:13px; }
+  .code-h button:hover { border-color:var(--glow); color:var(--glow); }
+  #output { display:block; width:100%; min-height:240px; border:0; border-radius:0; padding:14px 16px; background:transparent; color:var(--cv-fg); font:13px/1.55 ui-monospace, "Cascadia Mono", Consolas, monospace; resize:vertical; }
+  #output:focus { box-shadow:none; }
+  #output::placeholder { color:var(--cv-muted); }
+
+  /* ---- the workbench canvas ---- */
+  aside { position:sticky; top:calc(var(--hdr) + 20px); align-self:start; }
+  .canvas { border-radius:18px; background:color-mix(in srgb, var(--cv) 72%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid color-mix(in srgb, var(--glow) 22%, var(--cv-line)); padding:6px; box-shadow:0 0 0 1px rgba(45,212,236,.04), 0 24px 60px -32px rgba(45,212,236,.35); }
+  /* canvas header: Pipeline / .env tabs + the "live" note */
+  .cv-h { display:flex; align-items:center; gap:10px; margin:6px 8px 8px; }
+  .tabs { display:flex; gap:2px; padding:3px; border-radius:10px; background:var(--cv-node); border:1px solid var(--cv-line); }
+  .tabs button { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border:0; border-radius:7px; background:transparent; color:var(--cv-muted); font-size:12.5px; font-weight:600; }
+  .tabs button:hover { color:var(--cv-fg); }
+  .tabs button[aria-selected=true] { background:var(--cv-line); color:var(--cv-fg); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--glow) 35%, transparent); }
+  .tabs .mono { font-family:ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .tabs .cnt { min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--cv-warn); color:#1A1200; font-size:11px; line-height:18px; text-align:center; }
+  .cv-h .live { margin-left:auto; display:flex; align-items:center; gap:7px; font-size:12px; color:var(--cv-muted); text-align:right; }
+  .pane-t { display:none; }
+  .cv-h .live::before, .pane-t .live::before { content:""; flex:none; width:7px; height:7px; border-radius:50%; background:var(--glow); box-shadow:0 0 10px var(--glow); }
+
+  /* ---- .env panel: which keys SETUP writes, which it prefills, which the user fills later ---- */
+  #envp { padding:2px 8px 10px; max-height:calc(100vh - var(--hdr) - 90px); overflow:auto; }
+  .env-status { padding:10px 12px; border-radius:10px; font-size:13px; line-height:1.5; margin-bottom:10px; border:1px solid var(--cv-line); color:var(--cv-fg); }
+  .env-status.ok { border-color:color-mix(in srgb, var(--glow) 35%, transparent); background:var(--soft); }
+  .env-status.todo { border-color:rgba(245,165,36,.4); background:var(--warn-soft); }
+  .env-status.wait { color:var(--cv-muted); }
+  .env-legend { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11.5px; color:var(--cv-muted); margin:0 4px 8px; }
+  .env-legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; box-sizing:border-box; }
+  .env-legend .l-pre { background:var(--glow); } .env-legend .l-dflt { background:var(--cv-edge); }
+  .env-legend .l-fill { border:1.5px dashed var(--cv-warn); } .env-legend .l-off { background:var(--cv-line); opacity:.6; }
+  .env-file { border-radius:12px; border:1px solid var(--cv-line); background:var(--field); overflow:hidden; }
+  .env-file .code-h .note { margin-left:auto; font:12px system-ui, sans-serif; }
+  .env-g { padding:8px 0 6px; }
+  .env-g + .env-g { border-top:1px solid var(--cv-line); }
+  .env-g h3 { margin:0 14px 4px; font:600 10.5px system-ui, sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--cv-muted); }
+  .kv { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:8px; align-items:center; padding:5px 12px 5px 11px; border-left:3px solid transparent; font:12.5px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace; transition:background-color .2s, opacity .25s; }
+  .kv .line { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--cv-fg); }
+  .kv .eq { color:var(--cv-muted); }
+  .kv .tag { font:600 10.5px/1.6 system-ui, sans-serif; padding:1px 7px; border-radius:6px; white-space:nowrap; background:var(--cv-line); color:var(--cv-muted); }
+  .kv .why { grid-column:1 / -1; font:11.5px/1.4 system-ui, sans-serif; color:var(--cv-muted); }
+  .kv.pre { border-left-color:var(--glow); } .kv.pre .val { color:var(--glow); } .kv.pre .tag { background:var(--soft); color:var(--glow); }
+  .kv.dflt { border-left-color:var(--cv-edge); }
+  .kv.todo .val { color:var(--cv-muted); font-family:system-ui, sans-serif; }
+  .kv.fill { border-left-color:var(--cv-warn); background:linear-gradient(90deg, var(--warn-soft), transparent 75%); }
+  .kv.fill .val::after { content:""; display:inline-block; width:72px; margin-left:2px; border-bottom:1.5px dashed var(--cv-warn); vertical-align:-2px; }
+  .kv.fill .tag { background:var(--warn-soft); color:var(--cv-warn); }
+  .kv.off { opacity:.38; } .kv.off .k { text-decoration:line-through; text-decoration-color:var(--cv-muted); }
+  .kv[data-q] { cursor:pointer; }
+  .kv[data-q]:hover, .kv.hot { background-color:color-mix(in srgb, var(--glow) 9%, transparent); }
+  .kv.ping { animation:kvping .7s ease-out; }
+  @keyframes kvping { 30% { background-color:color-mix(in srgb, var(--glow) 24%, transparent); } }
+  .canvas svg { width:100%; height:auto; max-height:calc(100vh - var(--hdr) - 90px); display:block; }
+  .canvas svg.hidden { display:none; }
+  .node rect.box { fill:var(--cv-node); stroke:var(--cv-edge); stroke-width:1.25; transition:stroke .25s, fill .25s; }
+  .node rect.tile { fill:var(--cv-line); transition:fill .25s; }
+  .node .ico { color:var(--cv-muted); transition:color .25s; }
+  .node .t { font-size:12.5px; font-weight:600; fill:var(--cv-fg); }
+  .node .v { font-size:11px; fill:var(--cv-muted); }
+  .node.sm .t { font-size:11px; }
+  .node.on rect.box { stroke:var(--glow); }
+  .node.on rect.tile { fill:var(--glow); }
+  .node.on .ico { color:var(--glow-ink); }
+  .node.on { filter:drop-shadow(0 0 8px rgba(45,212,236,.35)); }
+  .node.todo rect.box { stroke-dasharray:4 4; }
+  .node.off { opacity:.32; }
+  .node.off rect.box { stroke-dasharray:4 4; }
+  .node.warn rect.box { stroke:var(--cv-warn); }
+  .node.warn rect.tile { fill:var(--cv-warn); }
+  .node.warn .ico { color:var(--glow-ink); }
+  .node.warn .v { fill:var(--cv-warn); }
+  .node[data-q] { cursor:pointer; }
+  .node[data-q]:hover rect.box { fill:#182439; }
+  .node[data-q]:focus { outline:none; }
+  .node[data-q]:focus rect.box { stroke:var(--cv-fg); }
+  .node { transition:transform .4s cubic-bezier(.2,.8,.2,1), opacity .25s; }
+  .node.hot rect.box { stroke:var(--glow); fill:#182439; }
+  .node.hot { filter:drop-shadow(0 0 12px rgba(45,212,236,.6)); }
+  .node.ping rect.box { animation:ping .7s ease-out; }
+  @keyframes ping { 0% { stroke-width:1.25; } 25% { stroke-width:4; stroke:var(--glow); } 100% { stroke-width:1.25; } }
+  button.ready { box-shadow:0 0 0 3px var(--soft), 0 0 22px rgba(45,212,236,.45); }
+  .edge { fill:none; stroke:var(--cv-edge); stroke-width:1.5; transition:stroke .25s; }
+  .edge.on { stroke:var(--glow); opacity:.55; }
+  .pulse { fill:none; stroke:var(--glow); stroke-width:3; stroke-linecap:round; stroke-dasharray:0 18; animation:run 1.2s linear infinite; filter:drop-shadow(0 0 4px var(--glow)); }
+  @keyframes run { to { stroke-dashoffset:-18; } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation:none; stroke-dasharray:none; stroke-width:2; } .kv.ping { animation:none; } .node, .progress .bar i, fieldset::before { transition:none; } html { scroll-behavior:auto; } }
+  /* wide screens (Full HD and up): questions | pipeline | .env side by side, no tabs */
+  @media (min-width: 1600px) {
+    .shell, .hwrap { max-width:1760px; }
+    .shell { grid-template-columns:minmax(0,1fr) 888px; }
+    .canvas { display:grid; grid-template-columns:420px 440px; gap:28px; align-items:start; padding:0; border:0; border-radius:0; background:none; box-shadow:none; backdrop-filter:none; -webkit-backdrop-filter:none; }
+    .canvas > .cv-h { display:none; }
+    .canvas .pane, .canvas .pane.hidden { display:block; border-radius:18px; background:color-mix(in srgb, var(--cv) 72%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid color-mix(in srgb, var(--glow) 22%, var(--cv-line)); padding:6px; box-shadow:0 0 0 1px rgba(45,212,236,.04), 0 24px 60px -32px rgba(45,212,236,.35); }
+    .pane-t { display:flex; align-items:center; gap:8px; margin:10px 10px 10px 12px; font-size:13px; font-weight:600; color:var(--cv-fg); }
+    .pane-t .mono { font-family:ui-monospace, "Cascadia Mono", Consolas, monospace; }
+    .pane-t .cnt { min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--cv-warn); color:#1A1200; font-size:11px; line-height:18px; text-align:center; }
+    .pane-t .live { margin-left:auto; display:flex; align-items:center; gap:7px; font-size:12px; font-weight:400; color:var(--cv-muted); }
+    .canvas svg { max-height:calc(100vh - var(--hdr) - 100px); }
+    #envp { max-height:calc(100vh - var(--hdr) - 100px); }
+  }
+  @media (max-width: 980px) {
+    .hwrap { flex-wrap:wrap; gap:10px 16px; }
+    .steps { order:3; width:100%; margin-left:0; }
+    .progress { min-width:0; }
+    p.lead { white-space:normal; }
+    .shell { grid-template-columns:1fr; gap:20px; }
+    aside { position:static; order:-1; }
+    .canvas svg { max-height:72vh; }
+    form { padding-left:44px; }
+    .n { left:-44px; }
+    fieldset::before { left:-30px; }
+    h1 { font-size:20px; }
+  }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="grid"></div><div class="floor"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="stars"></div></div>
+<header>
+<div class="hwrap">
+  <div class="brand">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DD4EC"/><stop offset="1" stop-color="#7C5CFF"/></linearGradient></defs><path d="M56.43 23.11 A26 26 0 1 1 36.51 6.4 M29.73 10.29 L36.51 6.4 L31.47 0.43" stroke="url(#mg)" stroke-width="4"/><path d="M19 18 L32 49 L45 18 M24.5 28 H39.5" stroke="url(#mg)" stroke-width="4.5"/><path d="M19 46 L32 15 L45 46 M24.5 36 H39.5" stroke="#E8EEF6" stroke-width="4.5"/></svg></div>
+    <div>
+    <h1>QAnyone <span class="setup">setup</span></h1>
+    <p class="lead">QA + Anyone · Playwright automation for everyone</p>
+    </div>
+  </div>
+  <nav class="steps" id="steps" aria-label="Questions"></nav>
+  <div class="progress"><div class="txt" id="prog-txt"></div><div class="bar"><i id="prog-bar"></i></div></div>
+  <div class="lang" role="group" aria-label="Interface language"><button type="button" data-lang="en">EN</button><button type="button" data-lang="vi">VI</button></div>
+</div>
+</header>
+<div class="shell">
+<p class="intro" data-i18n="intro"></p>
+
+<form onsubmit="return false">
+<fieldset id="q-base"><legend><span class="n"><span>1</span></span><span data-i18n="q1"></span><span class="req" title="required">*</span></legend>
+  <input type="text" id="base_url" placeholder="https://app.example.com" required>
+</fieldset>
+
+<fieldset id="q-auth"><legend><span class="n"><span>2</span></span><span data-i18n="q2"></span><span class="req" title="required">*</span></legend>
+  <label><input type="radio" name="auth" value="none"> <span data-i18n="q2.none"></span></label>
+  <label><input type="radio" name="auth" value="form"> <span data-i18n="q2.form"></span></label>
+  <label><input type="radio" name="auth" value="azure-ad"> <span data-i18n="q2.azure"></span></label>
+  <label><input type="radio" name="auth" value="google"> <span data-i18n="q2.google"></span></label>
+  <label><input type="radio" name="auth" value="okta-auth0"> <span data-i18n="q2.okta"></span></label>
+  <label><input type="radio" name="auth" value="other"> <span data-i18n="q2.other"></span> <input type="text" id="auth_other" data-i18n-ph="ph.describe"></label>
+</fieldset>
+
+<fieldset id="q-two-fa" class="hidden"><legend><span class="n"><span>3</span></span><span data-i18n="q3"></span></legend>
+  <label><input type="radio" name="two_fa" value="none" checked> <span data-i18n="q3.none"></span></label>
+  <label><input type="radio" name="two_fa" value="totp"> <span data-i18n="q3.totp"></span></label>
+  <label><input type="radio" name="two_fa" value="sms"> <span data-i18n="q3.sms"></span></label>
+  <label><input type="radio" name="two_fa" value="push"> <span data-i18n="q3.push"></span></label>
+  <label><input type="radio" name="two_fa" value="unknown"> <span data-i18n="q3.unknown"></span></label>
+</fieldset>
+
+<fieldset id="q-totp" class="hidden" data-optional><legend><span class="n"><span>4</span></span><span data-i18n="q4"></span></legend>
+  <label><input type="radio" name="totp_secret_available" value="true"> <span data-i18n="q4.yes"></span></label>
+  <label><input type="radio" name="totp_secret_available" value="false"> <span data-i18n="q4.no"></span></label>
+</fieldset>
+
+<fieldset id="q-sources"><legend><span class="n"><span>5</span></span><span data-i18n="q5"></span></legend>
+  <label><input type="checkbox" name="sources" value="md" checked disabled> <span data-i18n="q5.md"></span></label>
+  <label><input type="checkbox" name="sources" value="codegen" checked disabled> <span data-i18n="q5.cg"></span></label>
+  <label><input type="checkbox" name="sources" value="ado"> <span data-i18n="q5.ado"></span></label>
+</fieldset>
+
+<fieldset id="q-ado" class="hidden"><legend><span class="n"><span>6</span></span>Azure DevOps</legend>
+  <div class="fields">
+    <label for="ado_org"><span data-i18n="q6.org"></span><span class="req" title="required">*</span></label>
+    <input type="text" id="ado_org" placeholder="https://dev.azure.com/my-org" required>
+    <label for="ado_project"><span data-i18n="q6.project"></span><span class="req" title="required">*</span></label>
+    <input type="text" id="ado_project" data-i18n-ph="ph.project" required>
+  </div>
+  <p class="hint" data-i18n="q6.hint"></p>
+</fieldset>
+
+<input type="hidden" id="browsers" value="chromium">
+
+<fieldset id="q-lang"><legend><span class="n"><span>7</span></span><span data-i18n="q7"></span></legend>
+  <label><input type="radio" name="language" value="en" checked> English</label>
+  <label><input type="radio" name="language" value="vi"> Tiếng Việt</label>
+</fieldset>
+
+<fieldset id="q-notes" data-optional><legend><span class="n"><span>8</span></span><span data-i18n="q8"></span></legend>
+  <textarea id="notes" rows="3" data-i18n-ph="ph.notes"></textarea>
+</fieldset>
+
+<fieldset id="q-own"><legend><span class="n"><span>+</span></span><span data-i18n="q9"></span></legend>
+  <div id="qa-list"></div>
+  <button type="button" class="secondary" id="add-qa" data-i18n="addq"></button>
+</fieldset>
+
+<div class="actions"><button type="button" id="generate" data-i18n="generate"></button> <span class="hint" data-i18n="required"></span></div>
+<div class="code">
+  <div class="code-h"><span class="name">qanyone.config.md</span><span id="copied"></span><button type="button" id="copy" data-i18n="copy"></button></div>
+  <textarea id="output" readonly data-i18n-ph="ph.output"></textarea>
+</div>
+<p class="hint" data-i18n="next"></p>
+</form>
+
+<aside>
+  <div class="canvas">
+    <div class="cv-h">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="flow" aria-controls="pane-flow" data-i18n="tab.flow"></button>
+        <button type="button" role="tab" data-tab="env" aria-controls="pane-env"><span class="mono">.env</span><span class="cnt env-cnt hidden"></span></button>
+      </div>
+      <span class="live" data-i18n="canvas"></span>
+    </div>
+    <div class="pane" id="pane-flow" role="tabpanel">
+    <h2 class="pane-t"><span data-i18n="tab.flow"></span><span class="live" data-i18n="canvas"></span></h2>
+    <svg id="flow" viewBox="0 0 396 640" role="img" aria-label="Pipeline configured by your answers">
+      <defs>
+        <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.2" style="fill:var(--cv-dot)"/></pattern>
+        <symbol id="i-globe" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12"/></symbol>
+        <symbol id="i-db" viewBox="0 0 16 16"><ellipse cx="8" cy="4" rx="5" ry="2"/><path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/></symbol>
+        <symbol id="i-doc" viewBox="0 0 16 16"><path d="M4 1.5h5l3 3v10H4z M9 1.5v3h3 M6 8.5h4 M6 11h4"/></symbol>
+        <symbol id="i-rec" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4" style="fill:currentColor"/></symbol>
+        <symbol id="i-ai" viewBox="0 0 16 16"><path d="M8 1.5l1.6 4.4L14 7.5l-4.4 1.6L8 13.5 6.4 9.1 2 7.5l4.4-1.6z"/></symbol>
+        <symbol id="i-lock" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></symbol>
+        <symbol id="i-key" viewBox="0 0 16 16"><circle cx="5.5" cy="10.5" r="3"/><path d="M7.6 8.4L13.5 2.5M11 5l2 2"/></symbol>
+        <symbol id="i-web" viewBox="0 0 16 16"><rect x="2" y="2.5" width="12" height="11" rx="1.5"/><path d="M2 6h12"/><circle cx="4.5" cy="4.3" r=".7" style="fill:currentColor"/></symbol>
+        <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3l8 5-8 5z"/></symbol>
+        <symbol id="i-out" viewBox="0 0 16 16"><rect x="3.5" y="2.5" width="9" height="11.5" rx="1.5"/><path d="M6 2.5h4v2H6z M6 8h4 M6 10.5h3"/></symbol>
+      </defs>
+      <rect id="flow-bg" width="396" height="640" rx="12" fill="url(#dots)"/>
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+    </div>
+    <div class="pane hidden" id="pane-env" role="tabpanel">
+    <h2 class="pane-t"><span class="mono">.env</span><span class="cnt env-cnt hidden"></span><span class="live" data-i18n="env.live"></span></h2>
+    <div id="envp">
+      <div class="env-status" id="env-status"></div>
+      <div class="env-legend"><span><i class="l-pre"></i><span data-i18n="leg.pre"></span></span><span><i class="l-dflt"></i><span data-i18n="leg.dflt"></span></span><span><i class="l-fill"></i><span data-i18n="leg.fill"></span></span><span><i class="l-off"></i><span data-i18n="leg.off"></span></span></div>
+      <div class="env-file"><div class="code-h"><span class="name">.env</span><span class="note" data-i18n="env.note"></span></div><div id="env-rows"></div></div>
+    </div>
+    </div>
+  </div>
+</aside>
+</div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const radio = (n) => (document.querySelector("input[name=" + n + "]:checked") || {}).value || "";
+  const checks = (n) => $$("input[name=" + n + "]:checked").map((i) => i.value);
+  const val = (id) => $("#" + id).value.trim();
+  const browsers = () => { const b = val("browsers").split(",").map((x) => x.trim()).filter(Boolean); return b.length ? b : ["chromium"]; };
+
+  // ---------- answered state + progress ----------
+  const isUrl = (v) => /^https?:\/\/\S+$/.test(v);
+  const DONE = {
+    "q-base": () => isUrl(val("base_url")),
+    "q-auth": () => radio("auth") !== "",
+    "q-two-fa": () => radio("two_fa") !== "",
+    "q-totp": () => radio("totp_secret_available") !== "",
+    "q-sources": () => true,   // markdown + codegen are always on
+    "q-ado": () => isUrl(val("ado_org")) && val("ado_project") !== "",
+    "q-lang": () => radio("language") !== "",
+    "q-notes": () => val("notes") !== "",
+  };
+  const OPTIONAL = { "q-notes": 1, "q-totp": 1 };   // totp key defaults to "not yet"
+  const missing = () => Object.keys(DONE).filter((id) => !OPTIONAL[id] && !$("#" + id).classList.contains("hidden") && !DONE[id]());
+  // ---------- interface language (separate from question 7, which is the language of the test cases) ----------
+  const I18N = {
+    en: {
+      intro: "Answer what applies, then copy the result into the chat. No secrets here — you will fill <code>.env</code> later.",
+      canvas: "updates as you answer", "tab.flow": "Pipeline",
+      "env.note": "never committed · the AI never reads values", "env.live": "keys this setup writes",
+      "leg.pre": "SETUP fills", "leg.dflt": "default", "leg.fill": "you fill", "leg.off": "not needed",
+      "g.app": "App", "g.run": "Run flags — change any time", "g.login": "Login", "g.2fa": "Two-factor", "g.ado": "Azure DevOps",
+      "e.pre": "SETUP fills", "e.dflt": "default", "e.fill": "you fill", "e.secret": "secret · you fill", "e.off": "not needed", "e.wait": "waiting", "e.from": "← question {n}",
+      "h.headless": "true = no window · false = watch the browser while tests run",
+      "h.trace": "step-by-step replay in the report. retain-on-failure = keep only when a test fails · on = every test · off = never",
+      "h.video": "screen recording, the heaviest. retain-on-failure = keep only when a test fails · on = every test (demos) · off = never",
+      "h.shot": "one image at the end of the test. only-on-failure = only when it fails · on = every test · off = never",
+      "h.user": "username (or email) of a test account", "h.pass": "that account's password",
+      "h.totp": "the authenticator setup key (base32)", "h.totp.later": "you don't have it yet — get it from whoever owns the account",
+      "h.pat": "a Personal Access Token with Test Management read & write",
+      "st.wait": "Answer question 2 to see which keys you will fill.",
+      "st.ok": "Nothing for you to fill — SETUP writes <code>.env</code> itself.",
+      "st.todo": "SETUP creates <code>.env</code> for you (an existing one is kept). Open it, fill the <b>{n}</b> amber keys, then type <code>OK</code> in the chat. The AI checks key names only, never the values.",
+      q1: "Base URL", q2: "Does the app require login?",
+      "q2.none": "No — public web", "q2.form": "Yes — standard login form (email / password)", "q2.azure": "Yes — Azure AD / Entra ID", "q2.google": "Yes — Google", "q2.okta": "Yes — Okta / Auth0", "q2.other": "Yes — other:", "ph.describe": "describe",
+      q3: "Two-factor authentication",
+      "q3.none": "None <span class=\"hint\">— also pick this if your test account bypasses 2FA (username + password only)</span>", "q3.totp": "TOTP (authenticator app)", "q3.sms": "SMS code", "q3.push": "Push notification", "q3.unknown": "Has 2FA, type unknown",
+      q4: "Do you have the TOTP secret key?", "q4.yes": "Yes — I will put it in .env", "q4.no": "Not yet",
+      q5: "Where do test cases come from?",
+      "q5.md": "Markdown files <span class=\"hint\">— always on. Write a test case as .md and run <code>RUN TC &lt;path.md&gt;</code>.</span>",
+      "q5.cg": "Playwright codegen <span class=\"hint\">— always on. Record the flow once in a real browser; the AI turns it into a test with real locators: <code>RUN TC &lt;name&gt;</code>.</span>",
+      "q5.ado": "Azure DevOps work items <span class=\"hint\">— test cases stored in Azure DevOps: <code>RUN TC &lt;id&gt;</code> pulls one in, <code>PUSH ADO &lt;id&gt;</code> writes it back.</span>",
+      "q6.org": "Organization URL", "q6.project": "Project name", "ph.project": "My Project", "q6.hint": "Full URL starting with https://. The PAT goes into .env later, not here.",
+      q7: "Language for test case text and reports",
+      q8: "Anything special about the app? (optional)", "ph.notes": "SPA, iframes, shadow DOM, slow loading, popups, date pickers…",
+      q9: "Your own questions (optional)", addq: "+ Add question", "ph.q": "Question", "ph.a": "Answer",
+      generate: "Generate config", required: "<span class=\"req\">*</span> required — stays blocked until answered", copy: "Copy", "ph.output": "# appears here after Generate",
+      next: "Next: paste it into the chat. The AI writes <code>qanyone.config.md</code> and continues SETUP.",
+      copied: "Copied.", copyfail: "Select-all and copy manually.", blocked: "Answer the highlighted questions first.",
+      progress: "{d} of {t} required answered",
+      "n.app": "Target app", wait: "waiting for question {n}", "n.login": "Login", "n.nologin": "No login step", "v.public": "public web", "v.cred": " · .env credentials",
+      "a.form": "Login form", "a.google": "Google sign-in", "a.other": "Custom login",
+      "n.2fa": "Second factor", "n.no2fa": "No second factor", "v.no2fa": "username + password is enough", "n.totp": "TOTP code", "v.totp.yes": "computed from TOTP_SECRET in .env", "v.totp.no": "login waits until the key is in .env",
+      "n.sms": "SMS code", "n.push": "Push notification", "v.block": "cannot be automated — blocks login", "n.unk": "2FA, type unknown", "v.unk": "AI inspects the 2FA screen once",
+      "v.optional": "optional", "v.project": "project name?", "v.tc": "test cases", "v.loc": "locators",
+      "n.ai": "AI normalizes each test case", "v.ai": "test-cases → pages → tests", "v.br": "add more in playwright.config.ts",
+      "n.run": "Run, self-heal, report", "v.run": "report in {lang} · data from each test case", "v.out.ready": "copy and paste into the chat", "v.out.wait": "fills in as you answer",
+    },
+    vi: {
+      intro: "Trả lời những gì áp dụng, rồi dán kết quả vào chat. Không nhập bí mật ở đây — bạn sẽ điền <code>.env</code> sau.",
+      canvas: "cập nhật theo câu trả lời", "tab.flow": "Pipeline",
+      "env.note": "không commit · AI không đọc giá trị", "env.live": "các key setup này ghi",
+      "leg.pre": "SETUP điền sẵn", "leg.dflt": "mặc định", "leg.fill": "bạn điền", "leg.off": "không cần",
+      "g.app": "Ứng dụng", "g.run": "Cờ chạy — đổi lúc nào cũng được", "g.login": "Đăng nhập", "g.2fa": "Xác thực 2 lớp", "g.ado": "Azure DevOps",
+      "e.pre": "SETUP điền", "e.dflt": "mặc định", "e.fill": "bạn điền", "e.secret": "bí mật · bạn điền", "e.off": "không cần", "e.wait": "đang chờ", "e.from": "← câu {n}",
+      "h.headless": "true = chạy ẩn · false = mở trình duyệt để xem test chạy",
+      "h.trace": "xem lại từng bước trong report. retain-on-failure = chỉ giữ khi test fail · on = mọi test · off = không ghi",
+      "h.video": "quay màn hình, nặng nhất. retain-on-failure = chỉ giữ khi test fail · on = mọi test (khi demo) · off = không ghi",
+      "h.shot": "một ảnh cuối test. only-on-failure = chỉ chụp khi fail · on = mọi test · off = không chụp",
+      "h.user": "username (hoặc email) của tài khoản test", "h.pass": "mật khẩu của tài khoản đó",
+      "h.totp": "khoá thiết lập của app authenticator (base32)", "h.totp.later": "bạn chưa có — xin từ người quản lý tài khoản",
+      "h.pat": "Personal Access Token có quyền Test Management đọc & ghi",
+      "st.wait": "Trả lời câu 2 để biết bạn cần điền key nào.",
+      "st.ok": "Bạn không cần điền gì — SETUP tự ghi <code>.env</code>.",
+      "st.todo": "SETUP tự tạo <code>.env</code> (đã có thì giữ nguyên). Mở file, điền <b>{n}</b> key màu cam, rồi gõ <code>OK</code> trong chat. AI chỉ kiểm tra tên key, không bao giờ đọc giá trị.",
+      q1: "Địa chỉ ứng dụng (Base URL)", q2: "Ứng dụng có cần đăng nhập không?",
+      "q2.none": "Không — web công khai", "q2.form": "Có — form đăng nhập thường (email / mật khẩu)", "q2.azure": "Có — Azure AD / Entra ID", "q2.google": "Có — Google", "q2.okta": "Có — Okta / Auth0", "q2.other": "Có — khác:", "ph.describe": "mô tả",
+      q3: "Xác thực hai lớp",
+      "q3.none": "Không <span class=\"hint\">— chọn mục này nếu tài khoản test được miễn 2FA (chỉ cần tên đăng nhập + mật khẩu)</span>", "q3.totp": "TOTP (ứng dụng authenticator)", "q3.sms": "Mã SMS", "q3.push": "Thông báo đẩy (push)", "q3.unknown": "Có 2FA, chưa rõ loại",
+      q4: "Bạn đã có secret key TOTP chưa?", "q4.yes": "Có — tôi sẽ điền vào .env", "q4.no": "Chưa có",
+      q5: "Test case lấy từ đâu?",
+      "q5.md": "File Markdown <span class=\"hint\">— luôn bật. Viết test case dạng .md rồi chạy <code>RUN TC &lt;path.md&gt;</code>.</span>",
+      "q5.cg": "Playwright codegen <span class=\"hint\">— luôn bật. Ghi lại thao tác một lần trên trình duyệt thật; AI biến nó thành test với locator thật: <code>RUN TC &lt;name&gt;</code>.</span>",
+      "q5.ado": "Work item trên Azure DevOps <span class=\"hint\">— test case lưu trên Azure DevOps: <code>RUN TC &lt;id&gt;</code> kéo về, <code>PUSH ADO &lt;id&gt;</code> đẩy ngược lên.</span>",
+      "q6.org": "URL tổ chức", "q6.project": "Tên project", "ph.project": "Tên project", "q6.hint": "URL đầy đủ, bắt đầu bằng https://. PAT sẽ điền vào .env sau, không nhập ở đây.",
+      q7: "Ngôn ngữ cho nội dung test case và báo cáo",
+      q8: "Ứng dụng có gì đặc biệt không? (tuỳ chọn)", "ph.notes": "SPA, iframe, shadow DOM, tải chậm, popup, date picker…",
+      q9: "Câu hỏi riêng của bạn (tuỳ chọn)", addq: "+ Thêm câu hỏi", "ph.q": "Câu hỏi", "ph.a": "Trả lời",
+      generate: "Tạo config", required: "<span class=\"req\">*</span> bắt buộc — chưa trả lời thì chưa tạo được", copy: "Sao chép", "ph.output": "# sẽ hiện ở đây sau khi bấm Tạo config",
+      next: "Tiếp theo: dán vào chat. AI sẽ ghi <code>qanyone.config.md</code> và tiếp tục SETUP.",
+      copied: "Đã sao chép.", copyfail: "Hãy chọn tất cả rồi sao chép thủ công.", blocked: "Hãy trả lời các câu được đánh dấu trước.",
+      progress: "{d} / {t} câu bắt buộc",
+      "n.app": "Ứng dụng đích", wait: "chờ câu {n}", "n.login": "Đăng nhập", "n.nologin": "Không cần đăng nhập", "v.public": "web công khai", "v.cred": " · tài khoản trong .env",
+      "a.form": "Form đăng nhập", "a.google": "Đăng nhập Google", "a.other": "Đăng nhập tuỳ biến",
+      "n.2fa": "Lớp xác thực thứ hai", "n.no2fa": "Không có lớp thứ hai", "v.no2fa": "tên đăng nhập + mật khẩu là đủ", "n.totp": "Mã TOTP", "v.totp.yes": "tính từ TOTP_SECRET trong .env", "v.totp.no": "đăng nhập chờ tới khi có key trong .env",
+      "n.sms": "Mã SMS", "n.push": "Thông báo đẩy", "v.block": "không tự động được — chặn đăng nhập", "n.unk": "2FA, chưa rõ loại", "v.unk": "AI xem màn hình 2FA một lần",
+      "v.optional": "tuỳ chọn", "v.project": "tên project?", "v.tc": "test case", "v.loc": "locator",
+      "n.ai": "AI chuẩn hoá từng test case", "v.ai": "test case → page → test", "v.br": "thêm trình duyệt trong playwright.config.ts",
+      "n.run": "Chạy, tự sửa, báo cáo", "v.run": "báo cáo {lang} · data theo test case", "v.out.ready": "sao chép rồi dán vào chat", "v.out.wait": "điền dần theo câu trả lời",
+    },
+  };
+  let LANG = "en";
+  try { LANG = localStorage.getItem("qanyone.ui") || (navigator.language.startsWith("vi") ? "vi" : "en"); } catch (e) {}
+  const t = (k, vars) => (I18N[LANG][k] || I18N.en[k] || k).replace(/\{(\w+)\}/g, (m, v) => (vars && v in vars ? vars[v] : m));
+  function applyLang() {
+    document.documentElement.lang = LANG;
+    $$("[data-i18n]").forEach((el) => { el.innerHTML = t(el.dataset.i18n); });
+    $$("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+    $$(".lang button").forEach((b) => b.classList.toggle("on", b.dataset.lang === LANG));
+    $$(".qa-q").forEach((i) => { i.placeholder = t("ph.q"); }); $$(".qa-a").forEach((i) => { i.placeholder = t("ph.a"); });
+    QS.forEach((f) => { const a = $("#steps a[data-q=" + f.id + "]"); if (a) a.title = f.querySelector("legend").textContent.replace("*", "").trim(); });
+    $("#copied").textContent = "";
+    if (typeof refresh === "function") refresh();
+  }
+  $$(".lang button").forEach((b) => b.addEventListener("click", () => { LANG = b.dataset.lang; try { localStorage.setItem("qanyone.ui", LANG); } catch (e) {} applyLang(); }));
+
+  // header step strip: one dot per question, mirrors the rail
+  const QS = $$("fieldset[id]").filter((f) => f.id !== "q-own");
+  QS.forEach((f) => { const a = document.createElement("a"); a.href = "#" + f.id; a.dataset.q = f.id; a.textContent = f.querySelector(".n span").textContent; if (f.hasAttribute("data-optional")) a.dataset.opt = "1"; $("#steps").appendChild(a); });
+  function syncSteps() {
+    QS.forEach((f) => { const a = $("#steps a[data-q=" + f.id + "]"); a.className = (a.dataset.opt ? "opt " : "") + (f.classList.contains("hidden") ? "hidden " : "") + (f.classList.contains("done") ? "done " : "") + (f.classList.contains("missing") ? "missing " : ""); });
+  }
+  function markCurrent() {
+    const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hdr")) + 40;
+    let cur = null;
+    QS.forEach((f) => { if (!f.classList.contains("hidden") && f.getBoundingClientRect().top <= top) cur = f; });
+    QS.forEach((f) => { const a = $("#steps a[data-q=" + f.id + "]"); a.classList.toggle("cur", f === cur); });
+  }
+  addEventListener("scroll", markCurrent, { passive: true });
+  function refresh() {
+    const auth = radio("auth");
+    const needsAuth = auth !== "" && auth !== "none";
+    $("#q-two-fa").classList.toggle("hidden", !needsAuth);
+    $("#q-totp").classList.toggle("hidden", !(needsAuth && radio("two_fa") === "totp"));
+    $("#q-ado").classList.toggle("hidden", !checks("sources").includes("ado"));
+    let total = 0, done = 0;
+    for (const id in DONE) {
+      const fs = $("#" + id);
+      const ok = DONE[id]();
+      fs.classList.toggle("done", ok);
+      fs.querySelectorAll("input[required]").forEach((i) => { const v = i.value.trim(); i.classList.toggle("invalid", v !== "" && (i.placeholder.startsWith("http") ? !isUrl(v) : false)); });
+      if (ok) fs.classList.remove("missing");
+      if (fs.classList.contains("hidden") || id === "q-notes") continue;
+      total++; if (ok) done++;
+    }
+    $("#prog-txt").textContent = t("progress", { d: done, t: total });
+    $("#prog-bar").style.width = (total ? (100 * done) / total : 0) + "%";
+    syncSteps(); markCurrent();
+    drawFlow(); drawEnv();
+  }
+  document.addEventListener("change", (e) => { refresh(); pingFor(e.target.closest("fieldset")); });
+  // question ↔ node link: hover a question → its node lights up; change an answer → the node pings
+  // (the same link drives the .env rows)
+  const nodesFor = (fs) => fs ? Object.values(made).filter((n) => n.g.dataset.q === fs.id).map((n) => n.g).concat($$(".kv[data-q=" + fs.id + "]")) : [];
+  function pingFor(fs) { nodesFor(fs).forEach((g) => { g.classList.remove("ping"); void g.getBoundingClientRect(); g.classList.add("ping"); setTimeout(() => g.classList.remove("ping"), 750); }); }
+  document.addEventListener("mouseover", (e) => { const fs = e.target.closest && e.target.closest("fieldset"); $$(".node.hot, .kv.hot").forEach((g) => g.classList.remove("hot")); nodesFor(fs).forEach((g) => g.classList.add("hot")); });
+  document.addEventListener("mouseleave", () => $$(".node.hot, .kv.hot").forEach((g) => g.classList.remove("hot")), true);
+  const goQ = (q) => { const f = q && $("#" + q); if (!f) return; f.scrollIntoView({ behavior: "smooth", block: "center" }); f.classList.add("flash"); setTimeout(() => f.classList.remove("flash"), 900); };
+  document.addEventListener("input", (e) => { if (e.target.matches("input[type=text], textarea")) refresh(); });
+
+  // ---------- flow canvas ----------
+  const W = 396, GAP = 44;
+  const AUTH = () => ({ form: t("a.form"), "azure-ad": "Azure AD / Entra ID", google: t("a.google"), "okta-auth0": "Okta / Auth0", other: t("a.other") });
+  const nodesEl = $("#nodes"), edgesEl = $("#edges");
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); return n; };
+  const made = {};
+  function node(id, w, h, icon, q) {
+    if (made[id]) return made[id];
+    const g = el("g", { class: "node", "data-id": id });
+    if (q) { g.setAttribute("data-q", q); g.setAttribute("tabindex", "0"); g.setAttribute("role", "button"); }
+    g.appendChild(el("rect", { class: "box", width: w, height: h, rx: 12 }));
+    const sm = w < 160, tile = sm ? 22 : 30, tx = sm ? 10 + tile + 8 : 14 + tile + 12;
+    if (sm) g.classList.add("sm");
+    g.appendChild(el("rect", { class: "tile", x: sm ? 10 : 14, y: h / 2 - tile / 2, width: tile, height: tile, rx: sm ? 7 : 9 }));
+    g.appendChild(el("use", { class: "ico", href: "#" + icon, x: (sm ? 10 : 14) + tile / 2 - 8, y: h / 2 - 8, width: 16, height: 16, fill: "none", stroke: "currentColor", "stroke-width": 1.5, "stroke-linecap": "round", "stroke-linejoin": "round" }));
+    g.appendChild(el("text", { class: "t", x: tx, y: h / 2 - 2 }));
+    g.appendChild(el("text", { class: "v", x: tx, y: h / 2 + 13 }));
+    nodesEl.appendChild(g);
+    const go = () => goQ(q);
+    g.addEventListener("click", go);
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    made[id] = { g, w, h };
+    return made[id];
+  }
+  function set(n, state, title, value) {
+    n.g.setAttribute("class", "node " + state + (n.w < 160 ? " sm" : ""));
+    const max = n.w - parseFloat(n.g.querySelector(".t").getAttribute("x")) - 10;
+    fit(n.g.querySelector(".t"), title, max);
+    fit(n.g.querySelector(".v"), value || "", max);
+    n.g.querySelector(".t").setAttribute("y", value ? n.h / 2 - 2 : n.h / 2 + 4);
+    n.state = state;
+    return n;
+  }
+  // text that would overflow its node is cut with an ellipsis; the full text stays in <title> (tooltip)
+  function fit(el, text, max) {
+    el.textContent = text;
+    let tip = el.querySelector("title");
+    if (!tip) { tip = document.createElementNS(NS, "title"); el.appendChild(tip); }
+    tip.textContent = text;
+    if (!el.getComputedTextLength) return;
+    let s = text;
+    while (s.length > 1 && el.getComputedTextLength() > max) { s = s.slice(0, -2) + "…"; el.firstChild.nodeValue = s; }
+  }
+  function place(n, x, y) { n.x = x; n.y = y; n.g.setAttribute("transform", "translate(" + x + "," + y + ")"); }
+  const onState = (b) => (b ? "on" : "off");
+  function drawFlow() {
+    const auth = radio("auth"), tf = radio("two_fa"), key = radio("totp_secret_available");
+    const src = checks("sources");
+    const rows = [];
+    // 1. target app
+    const base = val("base_url");
+    rows.push([set(node("app", 272, 62, "i-globe", "q-base"), base ? "on" : "todo", t("n.app"), base ? base.replace(/^https?:\/\//, "") : t("wait", { n: 1 }))]);
+    // 2. login
+    rows.push([set(node("login", 272, 62, "i-lock", "q-auth"), auth === "" ? "todo" : "on", auth === "none" ? t("n.nologin") : t("n.login"), auth === "" ? t("wait", { n: 2 }) : auth === "none" ? t("v.public") : AUTH()[auth] + t("v.cred"))]);
+    // 3–4. second factor (only when the app has a login)
+    if (auth !== "" && auth !== "none") {
+      let st = "todo", tt = t("n.2fa"), v = t("wait", { n: 3 });
+      if (tf === "none") { st = "on"; tt = t("n.no2fa"); v = t("v.no2fa"); }
+      else if (tf === "totp") { st = key === "true" ? "on" : key === "false" ? "warn" : "todo"; tt = t("n.totp"); v = key === "true" ? t("v.totp.yes") : key === "false" ? t("v.totp.no") : t("wait", { n: 4 }); }
+      else if (tf === "sms" || tf === "push") { st = "warn"; tt = tf === "sms" ? t("n.sms") : t("n.push"); v = t("v.block"); }
+      else if (tf === "unknown") { st = "warn"; tt = t("n.unk"); v = t("v.unk"); }
+      rows.push([set(node("2fa", 272, 62, "i-key", "q-two-fa"), st, tt, v)]);
+    }
+    // 5–6. sources: markdown + codegen always, Azure DevOps optional
+    rows.push([["ado", "Azure DevOps", "i-db"], ["md", "Markdown", "i-doc"], ["codegen", "Codegen", "i-rec"]].map(([k, tt, ic]) => {
+      const on = src.includes(k);
+      const v = k === "ado" ? (on ? (val("ado_project") || t("v.project")) : t("v.optional")) : k === "md" ? t("v.tc") : t("v.loc");
+      return set(node("s-" + k, 124, 54, ic, k === "ado" && on ? "q-ado" : "q-sources"), onState(on), tt, v);
+    }));
+    rows.push([set(node("ai", 272, 62, "i-ai"), "on", t("n.ai"), t("v.ai"))]);
+    // browsers: chromium unless the project already runs more (query-string prefill)
+    const BR = { chromium: "Chromium", firefox: "Firefox", webkit: "WebKit" };
+    rows.push([set(node("browsers", 272, 62, "i-web"), "on", browsers().map((k) => BR[k] || k).join(" · "), t("v.br"))]);
+    // 7–8. run
+    const lang = radio("language") || "en";
+    rows.push([set(node("run", 272, 62, "i-play", "q-lang"), "on", t("n.run"), t("v.run", { lang: lang === "vi" ? "Tiếng Việt" : "English" }))]);
+    // output
+    const ready = missing().length === 0;
+    $("#generate").classList.toggle("ready", ready);
+    rows.push([set(node("out", 272, 56, "i-out"), ready ? "on" : "todo", "qanyone.config.md", ready ? t("v.out.ready") : t("v.out.wait"))]);
+
+    // layout
+    const visible = new Set();
+    let y = 14;
+    rows.forEach((row) => {
+      if (row.length === 1) place(row[0], (W - row[0].w) / 2, y);
+      else row.forEach((n, i) => place(n, 6 + i * (n.w + 8), y));
+      row.forEach((n) => visible.add(n));
+      y += row[0].h + GAP;
+    });
+    const H = y - GAP + 14;
+    $("#flow").setAttribute("viewBox", "0 0 " + W + " " + H);
+    $("#flow-bg").setAttribute("height", H);
+    for (const id in made) made[id].g.style.display = visible.has(made[id]) ? "" : "none";
+    if (!drawFlow.ran) {   // one page-load moment: nodes light up top to bottom
+      drawFlow.ran = true;
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        let i = 0;
+        rows.forEach((row) => row.forEach((n) => { n.g.animate([{ opacity: 0 }, { opacity: getComputedStyle(n.g).opacity }], { duration: 420, delay: 80 + i++ * 70, easing: "ease-out", fill: "backwards" }); }));
+      }
+    }
+
+    // edges
+    edgesEl.textContent = "";
+    for (let r = 0; r + 1 < rows.length; r++) {
+      rows[r].forEach((a) => rows[r + 1].forEach((b) => {
+        const sx = a.x + a.w / 2, sy = a.y + a.h, dx = b.x + b.w / 2, dy = b.y;
+        const d = "M" + sx + " " + sy + " C" + sx + " " + (sy + GAP / 2) + " " + dx + " " + (dy - GAP / 2) + " " + dx + " " + dy;
+        const on = a.state === "on" && (b.state === "on" || b.state === "warn");
+        edgesEl.appendChild(el("path", { class: "edge" + (on ? " on" : ""), d }));
+        if (on) edgesEl.appendChild(el("path", { class: "pulse", d }));
+      }));
+    }
+  }
+
+  // ---------- .env panel ----------
+  // mirrors setup.md step 3: .env.example keeps only the keys this config needs; BASE_URL and AUTH_REQUIRED are
+  // prefilled, run flags carry their defaults, credentials / ADO keys are left for the user. No auth and no ADO →
+  // SETUP writes .env itself. Only key names and non-secret values are shown; secrets are never typed here.
+  function envGroups() {
+    const auth = radio("auth"), needsAuth = auth !== "" && auth !== "none", base = val("base_url");
+    const totp = needsAuth && radio("two_fa") === "totp", ado = checks("sources").includes("ado");
+    const fill = (on, k, q, why, secret) => on ? { k, q, st: "fill", tag: t(secret ? "e.secret" : "e.fill"), why } : { k, q, st: "off", tag: t("e.off") };
+    const org = val("ado_org"), proj = val("ado_project");
+    // a non-secret key SETUP prefills from an answer (question n); dropped when not needed
+    const pre = (on, k, v, n) => !on ? { k, q: "q-ado", st: "off", tag: t("e.off") } : v ? { k, q: "q-ado", st: "pre", v, tag: t("e.pre") } : { k, q: "q-ado", st: "todo", v: t("e.from", { n }), tag: t("e.wait") };
+    return [
+      ["g.app", [
+        isUrl(base) ? { k: "BASE_URL", q: "q-base", st: "pre", v: base, tag: t("e.pre") } : { k: "BASE_URL", q: "q-base", st: "todo", v: t("e.from", { n: 1 }), tag: t("e.wait") },
+        auth ? { k: "AUTH_REQUIRED", q: "q-auth", st: "pre", v: String(needsAuth), tag: t("e.pre") } : { k: "AUTH_REQUIRED", q: "q-auth", st: "todo", v: t("e.from", { n: 2 }), tag: t("e.wait") },
+      ]],
+      ["g.run", [["HEADLESS", "false", "h.headless"], ["TRACE", "retain-on-failure", "h.trace"], ["VIDEO", "retain-on-failure", "h.video"], ["SCREENSHOT", "only-on-failure", "h.shot"]]
+        .map(([k, v, h]) => ({ k, st: "dflt", v, tag: t("e.dflt"), why: t(h) }))],
+      ["g.login", [fill(needsAuth, "LOGIN_USERNAME", "q-auth", t("h.user")), fill(needsAuth, "LOGIN_PASSWORD", "q-auth", t("h.pass"), true)]],
+      ["g.2fa", [fill(totp, "TOTP_SECRET", totp ? "q-totp" : "q-two-fa", t(radio("totp_secret_available") === "false" ? "h.totp.later" : "h.totp"), true)]],
+      ["g.ado", [pre(ado, "ADO_ORG", isUrl(org) && org, 6), pre(ado, "ADO_PROJECT", proj, 6), fill(ado, "ADO_PAT", "q-ado", t("h.pat"), true)]],
+    ];
+  }
+  const div = (cls, text) => { const d = document.createElement("div"); if (cls) d.className = cls; if (text != null) d.textContent = text; return d; };
+  const span = (cls, text) => { const d = document.createElement("span"); d.className = cls; d.textContent = text; return d; };
+  function drawEnv() {
+    const box = $("#env-rows");
+    box.textContent = "";
+    let n = 0;
+    envGroups().forEach(([g, rows]) => {
+      const sec = div("env-g");
+      sec.appendChild(document.createElement("h3")).textContent = t(g);
+      rows.forEach((r) => {
+        if (r.st === "fill") n++;
+        const row = div("kv " + r.st), line = div("line");
+        line.append(span("k", r.k), span("eq", "="), span("val", r.v || ""));
+        row.append(line, span("tag", r.tag));
+        if (r.why && r.st !== "off") row.appendChild(div("why", r.why));
+        if (r.q) { row.dataset.q = r.q; row.addEventListener("click", () => goQ(r.q)); }
+        sec.appendChild(row);
+      });
+      box.appendChild(sec);
+    });
+    const st = $("#env-status"), auth = radio("auth");
+    st.className = "env-status " + (n ? "todo" : auth ? "ok" : "wait");
+    st.innerHTML = n ? t("st.todo", { n }) : auth ? t("st.ok") : t("st.wait");
+    $$(".env-cnt").forEach((c) => { c.textContent = n; c.classList.toggle("hidden", !n); });
+  }
+  // Pipeline / .env tabs; the choice is a per-viewer convenience
+  let TAB = "flow";
+  try { TAB = localStorage.getItem("qanyone.tab") === "env" ? "env" : "flow"; } catch (e) {}
+  function showTab(tab) {
+    TAB = tab;
+    $$(".tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+    $("#pane-flow").classList.toggle("hidden", tab !== "flow");
+    $("#pane-env").classList.toggle("hidden", tab !== "env");
+    if (tab === "flow") drawFlow();   // text fitting needs the svg on screen
+  }
+  // from 1600px both panes show side by side (CSS); the pipeline may have been fitted while hidden
+  matchMedia("(min-width: 1600px)").addEventListener("change", () => drawFlow());
+  $$(".tabs button").forEach((b) => b.addEventListener("click", () => { showTab(b.dataset.tab); try { localStorage.setItem("qanyone.tab", TAB); } catch (e) {} }));
+
+  // ---------- own questions ----------
+  $("#add-qa").addEventListener("click", () => {
+    const row = document.createElement("div");
+    row.className = "qa";
+    row.innerHTML = '<input type="text" class="qa-q" placeholder="' + t("ph.q") + '"><input type="text" class="qa-a" placeholder="' + t("ph.a") + '"><button type="button" class="secondary qa-x" title="Remove">×</button>';
+    row.querySelector(".qa-x").addEventListener("click", () => row.remove());
+    $("#qa-list").appendChild(row);
+  });
+
+  // ---------- generate ----------
+  const yq = (v) => JSON.stringify(String(v));   // YAML double-quoted scalar (JSON escaping is valid YAML)
+  const list = (a) => "[" + a.join(", ") + "]";
+
+  function generate() {
+    const miss = missing();
+    if (miss.length) {
+      miss.forEach((id) => $("#" + id).classList.add("missing"));
+      syncSteps();
+      $("#" + miss[0]).scrollIntoView({ behavior: "smooth", block: "center" });
+      $("#copied").textContent = t("blocked");
+      $("#output").value = "";
+      return;
+    }
+    $("#copied").textContent = "";
+    const auth = radio("auth") || "none";
+    const sources = ["ado", "md", "codegen"].filter((k) => checks("sources").includes(k));
+    const lines = ["---", "base_url: " + yq(val("base_url")), "auth: " + auth];
+    if (auth === "other") lines.push("auth_other: " + yq(val("auth_other")));
+    if (auth !== "none") {
+      const tf = radio("two_fa") || "none";
+      lines.push("two_fa: " + tf);
+      if (tf === "totp") lines.push("totp_secret_available: " + (radio("totp_secret_available") === "true"));
+    }
+    lines.push("sources: " + list(sources));
+    if (sources.includes("ado")) {
+      lines.push("ado_org: " + yq(val("ado_org")));
+      lines.push("ado_project: " + yq(val("ado_project")));
+    }
+    lines.push("browsers: " + list(browsers()));
+    lines.push("language: " + (radio("language") || "en"));
+    lines.push("---", "## Notes");
+    const notes = val("notes");
+    if (notes) lines.push(notes, "");
+    $$(".qa").forEach((r) => {
+      const q = r.querySelector(".qa-q").value.trim();
+      const a = r.querySelector(".qa-a").value.trim();
+      if (q || a) lines.push("**" + q + "** " + a, "");
+    });
+    $("#output").value = lines.join("\n").trimEnd() + "\n";
+  }
+  $("#generate").addEventListener("click", generate);
+  $("#copy").addEventListener("click", async () => {
+    if (!$("#output").value) generate();
+    if (!$("#output").value) return;
+    try {
+      await navigator.clipboard.writeText($("#output").value);
+      $("#copied").textContent = t("copied");
+    } catch (e) {
+      $("#output").select();
+      $("#copied").textContent = t("copyfail");
+    }
+  });
+
+  // Prefill from the query string (SETUP uses this on existing repos). Secrets never travel here.
+  const p = new URLSearchParams(location.search);
+  const setRadio = (n, v) => { const el = document.querySelector('input[name=' + n + '][value="' + v + '"]'); if (el) el.checked = true; };
+  const setChecks = (n, csv) => { $$("input[name=" + n + "]").forEach((i) => { i.checked = false; }); csv.split(",").forEach((v) => setRadio(n, v.trim())); };
+  if (p.get("baseUrl")) $("#base_url").value = p.get("baseUrl");
+  if (p.get("auth")) setRadio("auth", p.get("auth"));
+  if (p.get("twoFa")) setRadio("two_fa", p.get("twoFa"));
+  if (p.get("sources")) setRadio("sources", p.get("sources").includes("ado") ? "ado" : "");   // md + codegen are always on
+  if (p.get("adoOrg")) $("#ado_org").value = p.get("adoOrg");
+  if (p.get("adoProject")) $("#ado_project").value = p.get("adoProject");
+  if (p.get("browsers")) $("#browsers").value = p.get("browsers");
+  if (p.get("language")) setRadio("language", p.get("language"));
+  applyLang();
+  showTab(TAB);
+})();
+</script>
+</body>
+</html>

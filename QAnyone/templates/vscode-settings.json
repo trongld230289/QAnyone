@@ -1,0 +1,18 @@
+{
+  // QAnyone: let Copilot Chat (Agent mode) run the test workflow without a prompt per step.
+  // Terminal commands the pipeline uses; everything else still asks.
+  "chat.tools.terminal.autoApprove": {
+    "npm": true,
+    "npx": true,
+    "node": true,
+    "/^git (status|diff|log)\\b/": true,
+    // a copy out of QAnyone/templates only (SETUP itself uses `node QAnyone/setup/scaffold.mjs`)
+    "/^(Copy-Item|cp)\\s+(-\\S+\\s+)*[\"']?(\\.[\\\\/])?QAnyone[\\\\/]templates[\\\\/]/": true,
+    "rm": false,
+    "del": false,
+    "/dangerous/": false
+  },
+  // Approves every tool call, including file edits and Playwright MCP tools. VS Code shows a
+  // one-time warning. Set to false to be asked for edits and MCP tools again.
+  "chat.tools.global.autoApprove": true
+}

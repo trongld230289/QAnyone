@@ -1,0 +1,6 @@
+.superpowers/
+node_modules/
+.vscode/
+tools/forbidden.local
+test-results/
+.playwright-mcp/

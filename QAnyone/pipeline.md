@@ -1,0 +1,186 @@
+# RUN TC · RERUN TC · PUSH ADO · STATUS
+
+Read `rules.md` before step 5 and `formats.md` before step 2. After every step: EDIT
+`QANYONE_STATE.md` (`current_tc`, `current_step`). A new chat continues from `current_step`
+without repeating earlier questions. Several ids → run the whole pipeline per id, in order.
+
+Progress is shown in the chat as plain text (not in a code block), never with a todo / task tool:
+it does not behave the same on every platform. RUN TC and RERUN TC start with this line, before
+any RUN, WRITE or BROWSER:
+```text
+**RUN TC 102874 · 9 steps:** 1 Intake → 2 Normalize → 3 Map → 4 Discover → 5 POM → 6 Spec → 7 Run + self-heal → 8 Memory → 9 Report
+```
+Then every step starts with one line, before its first tool call (`done` = steps finished in
+this run, `left` = the steps still to run):
+```text
+**Step 3 · Map** (2/9 done) — left: 4 Discover → 5 POM → 6 Spec → 7 Run + self-heal → 8 Memory → 9 Report
+```
+RERUN TC or resume: list only the steps left, keep their numbers and count only them, e.g.
+`3 steps: 7 Run + self-heal → 8 Memory → 9 Report`, then `Step 7 · Run + self-heal (0/3 done)`.
+Several ids: the start line again when the next test case starts. Keep these labels in English,
+exactly. The rows of the test case's Steps table are not pipeline steps: never show them as
+progress.
+
+## RUN TC
+### 0. Precheck (silent)
+`phase: ready`; `auth_ready: true` when `auth ≠ none`; BROWSER tools available (otherwise
+say which MCP config to enable and stop). Numeric id but `ado_configured: false` → BLOCKING
+("fill the ADO keys in .env, or give a markdown file").
+
+### 1. Intake → raw steps
+- `RUN TC <number>` → RUN `npx tsx scripts/fetch-tc.ts <id>` → JSON `{ id, title, steps[] }`.
+- `RUN TC <path.md>` → READ the file. Any shape: tables, bullets, Gherkin, numbered prose,
+  Vietnamese or English, one or many test cases. Split into test cases at headings, or at
+  blank-line-separated blocks that start a new scenario.
+- `RUN TC <name>` → RUN BACKGROUND
+  `node QAnyone/setup/record.mjs <base_url> --load-storage=playwright/.auth/user.json`
+  (codegen in a maximized window; omit `--load-storage` when auth = none). Say: "The browser
+  is open. Do the flow once, then copy the recorded code from the Playwright Inspector and paste
+  it here." If it printed "Click Record", say that first. Wait. Parse the paste:
+  `goto` → Navigate, `click` → Click, `fill` → Fill, `check` / `uncheck` → Check / Uncheck,
+  `selectOption` → Select, `press` → Press, `setInputFiles` → Upload, `expect(...)` → Verify
+  with Expected taken from the matcher. Keep every locator for the TC Locators table
+  (`[FROM CODEGEN]`).
+
+### 2. Normalize → `test-cases/<id>-<slug>.md`
+Write one file per test case from `QAnyone/templates/test-case.md` following formats.md §1:
+id (ADO id · an id found in the file · otherwise the next free `TC-<n>` — SEARCH `test-cases/`
+first; several TCs in one file get consecutive numbers; an id found in the file that already
+exists in `test-cases/` is a collision → take the next free number and say so), title, `source`, `source_ref`, `feature` and `page` inferred from the steps (URL
+path or the page named in step 1), tags, `status: draft`. Rewrite steps with the fixed verbs,
+quoted element names, `{{key}}` data, `[Pre]` first row; move repeated literals into Test Data.
+Text language per state `language`.
+Right after writing, show the Steps and Test Data tables of every file just written (every
+source), before any tool call of step 3: this is where the user reads the test case. ADO source:
+show them in a chat message, set `confirmed` and continue.
+CONFIRM (sources `md` and `codegen`): ASK "Confirm these steps?" with the tables inside the ASK
+(core.md Platform map) and the options `OK` / `I edited the file(s), re-read them`. Source
+`codegen` with `ado_configured: true` asks instead "Save this test case as a markdown file only,
+or on Azure DevOps too?" with `Markdown file only` / `New Azure DevOps test case` / `Update an
+Azure DevOps test case` (its id typed with it, or ask for it) / `I edited the file, re-read it`.
+Edited → re-read, show the tables again in a new ASK. Then `status: confirmed`.
+- New → RUN `npx tsx scripts/ado-writer.ts create --from <tc file>`.
+- Update → RUN `npx tsx scripts/ado-writer.ts update --tc <ado id> --from <tc file>`.
+Both print `{ "id": … }`; the test case takes that id: rename the file to
+`test-cases/<id>-<slug>.md` (when `test-cases/<id>-*.md` exists, write into it and delete the new
+one), set `id`, `source_ref: ado:<id>` and `current_tc`, and give the work-item URL
+`<ado_org>/<project>/_workitems/edit/<id>`. A failed call → say why and ASK again.
+
+### 3. Map
+READ `pom-registry/INDEX.md`, the `<feature>.md` of the TC, and `_shared.md` when the steps
+touch navigation, login or dialogs. For every quoted element in the steps decide: registry hit
+(reuse) · TC Locators hit (codegen) · missing.
+
+### 4. Discover (missing elements only — rules.md Locator)
+Check rules.md Known-hard patterns first: iframe, dialog, upload, download, popup, drag-drop are
+action problems, not locator problems. Then BROWSER: `browser_navigate` to the page (`base_url`
++ `page`), perform the preceding steps when the element only appears after an action,
+`browser_snapshot`, then `browser_generate_locator` per missing element. Repeated names → scope
+by row / container; no context in the TC → BLOCKING ask. Add rows to the TC Locators table
+with `[FROM MCP]`. Steps performed here can create data on the app (a record, an export): list
+each item in the TC Notes and delete it in BROWSER when done, if the app allows. Waiting for a
+server-side job: note how long it took — the spec's timeout is sized from it (rules.md).
+
+### 5. POM (rules.md POM shape)
+WRITE / EDIT `pages/<page>.page.ts` following `pages/page.template.ts`: add locators, one
+method per step verb group. New page → add the three lines in `fixtures/pages.fixture.ts` at
+the `PAGES-IMPORT`, `PAGES-TYPE`, `PAGES-FIXTURE` markers. EDIT `pom-registry/<feature>.md`
+(+ the `INDEX.md` row, `Used by` ids). Login / navigation pieces go to `_shared.md` instead.
+
+### 6. Spec
+WRITE `tests/<feature>/<id>-<slug>.spec.ts`:
+```ts
+import { test, expect } from "../../fixtures/pages.fixture";
+
+const data = { keyword: "QA" }; // from Test Data
+
+test.describe("102874 Search job by keyword", { tag: ["@regression"] }, () => {
+  test("102874 Search job by keyword", async ({ page, jobsPage }) => {
+    await test.step("1. [Pre] Logged in, on home page", async () => {
+      await page.goto("/");
+    });
+    await test.step('2. Click "Jobs"', async () => {
+      await jobsPage.goto();
+      await expect(page).toHaveURL(/\/jobs/);
+    });
+    await test.step('3. Fill "{{keyword}}" into "Search", press Enter', async () => {
+      await jobsPage.search(data.keyword);
+    });
+    await test.step("4. Verify results table", async () => {
+      await expect(jobsPage.resultsTable).toContainText(data.keyword);
+    });
+  });
+});
+```
+`describe` and `test` titles are both `<id> <title>`. One `test.step` per TC row, same numbering and text. Every non-empty Expected → `expect()`.
+EDIT the TC frontmatter `spec:`. RUN `npx tsc -p tsconfig.json`; fix type errors.
+
+### 7. Run + self-heal
+RUN `npx playwright test <id> --project=chromium` (then each extra browser in state). An
+onboarded repo has its own project names: use the project(s) in `playwright.config.ts` that run
+the specs, never `setup`.
+Fail → read the error and `test-results/**/error-context.md`; apply only the allowed fixes
+(rules.md Self-heal); rerun. Max 3 rounds. Still failing, or the failure is an app bug / a
+wrong TC → `status: blocked`, reason + trace path in the TC Notes.
+
+### 8. Memory
+EDIT the TC frontmatter: `status: passing | blocked`, `last_run`, `heal_count` (+ the reason
+and trace path in Notes when blocked). EDIT `pom-registry` `Used by`. EDIT state: `tcs.<id>`,
+clear `current_tc` / `current_step`.
+
+### 9. Report
+Most users are not developers: show what the pipeline did, not only the result. Table headers
+and step names stay in English as below.
+1. Headline: `✅ TC 102874 — Search job by keyword · passing · 1 heal · 42 s`. Blocked →
+   `⛔ … blocked`, the reason and what the user should check; never say "fixed" for a blocked test.
+2. What each step did, one row per step that ran (RERUN TC / resume: only those); a step that
+   did nothing says why:
+
+| Step | Result |
+|---|---|
+| 1 Intake | 5 steps fetched from Azure DevOps |
+| 2 Normalize | `test-cases/102874-search-job.md`: 4 steps, 1 test data value |
+| 3 Map | 3 elements found in the registry, 2 missing |
+| 4 Discover | 2 locators found on the live page |
+| 5 POM | 1 page object created, 1 updated |
+| 6 Spec | `tests/jobs/102874-search-job.spec.ts`: 4 steps, 4 checks |
+| 7 Run + self-heal | passed on chromium after 1 fix (added a wait for the results table) |
+| 8 Memory | test case `passing`; `pom-registry/jobs.md` updated |
+| 9 Report | full report: `npx playwright show-report` |
+
+3. Every page object the spec uses: `new` (file created now), `updated` (locators added) or
+   `reused` (used as is), with where it lives and its locator counts:
+
+| Page object | File | Status | Locators |
+|---|---|---|---|
+| JobsPage | `pages/jobs.page.ts` | updated | 3 reused · 2 new |
+| SearchDialog | `pages/search-dialog.page.ts` | new | 4 new |
+
+4. How to run the test again without the AI: the step 7 command without `--retries` /
+   `--reporter`, one `--project` per browser, alone in its own code block so its copy button
+   copies only that line:
+```
+npx playwright test 102874 --project=chromium
+```
+and say: "In VS Code open **Terminal → New Terminal**, paste this line and press Enter. The
+browser runs the test and the last line says passed or failed. Or type `RERUN TC 102874` here."
+
+## RERUN TC <id>
+READ the TC file. If it is newer than the spec, or `status: draft` → run steps 3–6.
+Then steps 7–9.
+
+## PUSH ADO <id>
+Requires `ado_configured: true`. READ the TC file. Show the Steps table as it will appear in ADO
+(row 1 precondition, rows 2+ action / expected, `{{key}}` replaced by Test Data values) inside
+the ASK "Push to Azure DevOps?" with the options `Update existing TC <id>` (when source is ado or
+the id is numeric) · `Create new test case` (free text for an optional User Story id) · `Cancel`.
+- Update → RUN `npx tsx scripts/ado-writer.ts update --tc <id> --from test-cases/<id>-<slug>.md`
+  (the script reads Steps + Test Data and substitutes `{{key}}`; the `[Pre]` row goes first).
+- Create → RUN `npx tsx scripts/ado-writer.ts create --from test-cases/<id>-<slug>.md [--us <id>]`
+  → new ADO id → rename `test-cases/<old>-….md`, the spec file, the describe title, the
+  registry `Used by` ids and `tcs` in state to the new id; `source_ref: ado:<id>`.
+Report the ADO id and the work-item URL `<ado_org>/<project>/_workitems/edit/<id>`.
+
+## STATUS
+Print: phase, auth + `auth_updated`, sources, browsers; a table of `tcs` (id, title from the
+file, status, spec); registry: pages per feature and locator counts from `INDEX.md`.

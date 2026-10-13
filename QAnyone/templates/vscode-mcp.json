@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@playwright/mcp@latest", "--isolated", "--storage-state=playwright/.auth/user.json", "--caps=testing,storage", "--config=playwright-mcp.json"]
+    }
+  }
+}

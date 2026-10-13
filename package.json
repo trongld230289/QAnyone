@@ -1,0 +1,30 @@
+{
+  "name": "qanyone-dev",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node tools/check-package.mjs",
+    "test:form": "playwright test -c tools/playwright.config.ts",
+    "test:scripts": "node --import tsx --test tools/scripts.test.ts tools/totp.test.ts tools/excel.test.ts",
+    "test:scaffold": "bash tools/scaffold-smoke.sh",
+    "test": "npm run check && npm run test:scripts && npm run test:install && npm run test:form && npm run test:scaffold",
+    "test:install": "node --test tools/install.test.mjs tools/scaffold.test.mjs tools/record.test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "bin": {
+    "qanyone": "bin/qanyone.mjs"
+  },
+  "files": [
+    "bin",
+    "QAnyone",
+    "CLAUDE.md",
+    ".github/copilot-instructions.md"
+  ]
+}
