@@ -33,9 +33,10 @@ say which MCP config to enable and stop). Numeric id but `ado_configured: false`
   Vietnamese or English, one or many test cases. Split into test cases at headings, or at
   blank-line-separated blocks that start a new scenario.
 - `RUN TC <name>` → RUN BACKGROUND
-  `npx playwright codegen <base_url> --load-storage=playwright/.auth/user.json`
-  (omit `--load-storage` when auth = none). Say: "The browser is open. Do the flow once, then
-  copy the recorded code from the Playwright Inspector and paste it here." Wait. Parse the paste:
+  `node QAnyone/setup/record.mjs <base_url> --load-storage=playwright/.auth/user.json`
+  (codegen in a maximized window; omit `--load-storage` when auth = none). Say: "The browser
+  is open. Do the flow once, then copy the recorded code from the Playwright Inspector and paste
+  it here." If it printed "Click Record", say that first. Wait. Parse the paste:
   `goto` → Navigate, `click` → Click, `fill` → Fill, `check` / `uncheck` → Check / Uncheck,
   `selectOption` → Select, `press` → Press, `setInputFiles` → Upload, `expect(...)` → Verify
   with Expected taken from the matcher. Keep every locator for the TC Locators table

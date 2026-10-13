@@ -56,8 +56,8 @@ QANYONE_STATE.md exists                        → ASK: "Resume where I stopped"
       `form` with 2FA: the 2FA page exists only after submitting credentials, so say "Log in
       once in the Playwright browser window that is open, up to the 2FA screen; tell me when
       it shows." Then `browser_snapshot` and take the 2FA input / button locators from it.
-      BROWSER unavailable → RUN BACKGROUND `npx playwright codegen <base_url>`, ask the user to
-      log in once and paste the recorded code; take locators from it (`[FROM CODEGEN]`).
+      BROWSER unavailable → RUN BACKGROUND `node QAnyone/setup/record.mjs <base_url>`, ask the
+      user to log in once and paste the recorded code; take locators from it (`[FROM CODEGEN]`).
       Google sign-in often blocks automated browsers; if it does, report BLOCKING.
    b. EDIT `pages/login.page.ts` with the discovered locators, the real login route and
       `loggedOutUrl` (the URL pattern of the login page). Record `LoginPage` in

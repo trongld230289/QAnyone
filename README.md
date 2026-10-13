@@ -77,6 +77,7 @@ test-cases/ · pom-registry/ · QANYONE_STATE.md · qanyone.config.md · .env (i
 | `QAnyone/rules.md` | Locator, action, assertion and self-heal rules |
 | `QAnyone/setup/index.html` | Offline setup form (`setup/open.mjs` opens it in the browser, prefilled on Onboard) |
 | `QAnyone/setup/scaffold.mjs` | Builds the project from `qanyone.config.md` + templates in one command; never overwrites |
+| `QAnyone/setup/record.mjs` | `RUN TC <name>` recorder: Playwright codegen in a maximized window whose page fills it |
 | `QAnyone/templates/` | Playwright config, auth setup, page objects, fixture, helpers, ADO scripts, IDE approval settings |
 
 ## Development (this repo)

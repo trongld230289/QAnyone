@@ -7,7 +7,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REQUIRED = [
   "CLAUDE.md", ".github/copilot-instructions.md",
   "QAnyone/core.md", "QAnyone/setup.md", "QAnyone/pipeline.md", "QAnyone/formats.md", "QAnyone/rules.md",
-  "QAnyone/setup/index.html", "QAnyone/setup/scaffold.mjs", "QAnyone/templates/test-case.md",
+  "QAnyone/setup/index.html", "QAnyone/setup/scaffold.mjs", "QAnyone/setup/record.mjs", "QAnyone/templates/test-case.md",
   "QAnyone/templates/playwright.config.ts", "QAnyone/templates/auth.setup.ts",
   "QAnyone/templates/base.page.ts", "QAnyone/templates/page.template.ts",
   "QAnyone/templates/login.form.page.ts", "QAnyone/templates/login.azure-ad.page.ts", "QAnyone/templates/login.google.page.ts",
