@@ -3,12 +3,23 @@
 Read `rules.md` before step 5 and `formats.md` before step 2. After every step: EDIT
 `QANYONE_STATE.md` (`current_tc`, `current_step`). A new chat continues from `current_step`
 without repeating earlier questions. Several ids → run the whole pipeline per id, in order.
-TASKS is the first tool call of RUN TC and RERUN TC, before any RUN, WRITE or BROWSER: it replaces
-any earlier list with exactly one item per step that will run, titled `1 Intake`, `2 Normalize`,
-`3 Map`, `4 Discover`, `5 POM`, `6 Spec`, `7 Run + self-heal`, `8 Memory`, `9 Report` (RERUN TC
-or resume: only the steps left). Never add, rename or drop items: the test case's own steps are
-not tasks. Several test cases → prefix each title with the test case id and rewrite the list when
-the next one starts. Mark an item in progress when its step starts, completed when it ends.
+
+Progress is shown in the chat as plain text (not in a code block), never with a todo / task tool:
+it does not behave the same on every platform. RUN TC and RERUN TC start with this line, before
+any RUN, WRITE or BROWSER:
+```text
+**RUN TC 102874 · 9 steps:** 1 Intake → 2 Normalize → 3 Map → 4 Discover → 5 POM → 6 Spec → 7 Run + self-heal → 8 Memory → 9 Report
+```
+Then every step starts with one line, before its first tool call (`done` = steps finished in
+this run, `left` = the steps still to run):
+```text
+**Step 3 · Map** (2/9 done) — left: 4 Discover → 5 POM → 6 Spec → 7 Run + self-heal → 8 Memory → 9 Report
+```
+RERUN TC or resume: list only the steps left, keep their numbers and count only them, e.g.
+`3 steps: 7 Run + self-heal → 8 Memory → 9 Report`, then `Step 7 · Run + self-heal (0/3 done)`.
+Several ids: the start line again when the next test case starts. Keep these labels in English,
+exactly. The rows of the test case's Steps table are not pipeline steps: never show them as
+progress.
 
 ## RUN TC
 ### 0. Precheck (silent)
@@ -94,7 +105,9 @@ test.describe("102874 Search job by keyword", { tag: ["@regression"] }, () => {
 EDIT the TC frontmatter `spec:`. RUN `npx tsc -p tsconfig.json`; fix type errors.
 
 ### 7. Run + self-heal
-RUN `npx playwright test <id> --project=chromium` (then each extra browser in state).
+RUN `npx playwright test <id> --project=chromium` (then each extra browser in state). An
+onboarded repo has its own project names: use the project(s) in `playwright.config.ts` that run
+the specs, never `setup`.
 Fail → read the error and `test-results/**/error-context.md`; apply only the allowed fixes
 (rules.md Self-heal); rerun. Max 3 rounds. Still failing, or the failure is an app bug / a
 wrong TC → `status: blocked`, reason + trace path in the TC Notes.
@@ -112,6 +125,14 @@ spec   tests/jobs/102874-search-job.spec.ts
 report npx playwright show-report
 ```
 Blocked → the reason and what the user should check. Never say "fixed" for a blocked test.
+Then show how to run the test again without the AI (most users are not developers): the step 7
+command without `--retries` / `--reporter`, one `--project` per browser, alone in its own code
+block so its copy button copies only that line:
+```
+npx playwright test 102874 --project=chromium
+```
+and say: "In VS Code open **Terminal → New Terminal**, paste this line and press Enter. The
+browser runs the test and the last line says passed or failed. Or type `RERUN TC 102874` here."
 
 ## RERUN TC <id>
 READ the TC file. If it is newer than the spec, or `status: draft` → run steps 3–6.

@@ -4,9 +4,13 @@
 Usage: python tools/check-run.py [project_dir] [--session FILE]
 Reads the latest Copilot Chat session of the folder (or FILE) and checks its last `RUN TC` turn
 (`NEW TC`, the old name, counts too):
-  tasks  the first task list lists the pipeline steps 1 Intake … 9 Report, is written before any
-         work (command, file creation, browser) and keeps those items for the whole turn
-  steps  after the test case file is written, a chat message shows its Steps table
+  progress  a chat message lists the pipeline steps 1 Intake … 9 Report before any work
+            (command, file creation, browser); then each step starts with a line
+            `Step <n> · <name> (<done>/9 done) — left: …` in order, counts right, `left` naming
+            the next step
+  steps     after the test case file is written, a chat message shows its Steps table
+  rerun     after the last test run, a chat message has a code block holding only the
+            `npx playwright test …` command (no --retries / --reporter), so the user can copy it
 Exit code 0 when every check passes. Standard library only.
 """
 from __future__ import annotations
@@ -18,8 +22,11 @@ import re
 import sys
 from pathlib import Path
 
-STEPS = ["intake", "normalize", "map", "discover", "pom", "spec", "run", "memory", "report"]
+NAMES = ["Intake", "Normalize", "Map", "Discover", "POM", "Spec", "Run + self-heal", "Memory", "Report"]
+PIPELINE = re.compile(".*?".join(re.escape(f"{n} {name}") for n, name in enumerate(NAMES, 1)), re.S)
+MARK = re.compile(r"Step ([1-9])\s*[·:—-]\s*([A-Za-z][A-Za-z +-]*?)\**\s*\((\d+)/(\d+) done\)([^\n]*)")
 TABLE = re.compile(r"\|\s*#\s*\|\s*Action\s*\|\s*Expected\s*\|", re.I)
+RERUN = re.compile(r"```[^\n]*\n\s*(npx playwright test [^\n`]*?)\s*\n```")
 WORK = ("run_in_terminal", "copilot_createFile")
 
 
@@ -79,31 +86,29 @@ def last_new_tc(evts: list[tuple[str, object]]):
     return evts[s][1], evts[s + 1 : e]
 
 
-def titles(call: dict) -> list[str]:
-    return [str(i.get("title", "")) for i in (call.get("toolSpecificData") or {}).get("todoList") or []]
-
-
-def is_step_list(ts: list[str]) -> bool:
-    return len(ts) == len(STEPS) and all(
-        re.search(rf"(^|\D){n}\D.*{name}", t.lower()) for n, (t, name) in enumerate(zip(ts, STEPS), 1)
-    )
-
-
-def check_tasks(turn) -> tuple[bool, str]:
+def check_progress(turn) -> tuple[bool, str]:
     work = next((i for i, (k, c) in enumerate(turn) if k == "tool" and
                  (c["toolId"] in WORK or c["toolId"].startswith("mcp_playwright"))), len(turn))
-    lists = [(i, titles(c)) for i, (k, c) in enumerate(turn) if k == "tool" and c["toolId"] == "manage_todo_list" and titles(c)]
-    if not lists:
-        return False, "no task list written"
-    i, first = lists[0]
-    if not is_step_list(first):
-        return False, f"first list is not the pipeline steps: {first}"
-    if i > work:
-        return False, "task list written after work had started"
-    changed = [ts for _, ts in lists[1:] if ts != first]
-    if changed:
-        return False, f"items replaced later: {changed[0]}"
-    return True, "9 pipeline steps, written first, kept"
+    shown = next((i for i, (k, v) in enumerate(turn) if k == "text" and PIPELINE.search(str(v))), None)
+    if shown is None:
+        return False, "the 9 pipeline steps are never listed in chat"
+    if shown > work:
+        return False, "pipeline listed in chat after work had started"
+    marks = [m for k, v in turn if k == "text" for m in MARK.finditer(str(v))]
+    nums = [int(m[1]) for m in marks]
+    if not nums or nums[0] != 1 or nums[-1] != 9 or nums != sorted(set(nums)):
+        return False, f"step lines must run 1 … 9 in order, got {nums}"
+    for i, m in enumerate(marks):
+        n, name, done, total, rest = int(m[1]), m[2].strip(), int(m[3]), int(m[4]), m[5]
+        if name.lower() != NAMES[n - 1].lower():
+            return False, f"step {n} is named {name!r}, expected {NAMES[n - 1]!r}"
+        if (done, total) != (i, 9):
+            return False, f"step {n} says ({done}/{total} done), expected ({i}/9 done)"
+        if i + 1 < len(marks):
+            nxt = f"{nums[i + 1]} {NAMES[nums[i + 1] - 1]}"
+            if nxt not in rest.partition("left:")[2]:
+                return False, f"step {n}: 'left:' does not name {nxt}"
+    return True, f"pipeline listed first; step lines {nums} with counts and 'left'"
 
 
 def check_steps(turn) -> tuple[bool, str]:
@@ -114,6 +119,18 @@ def check_steps(turn) -> tuple[bool, str]:
     if any(k == "text" and TABLE.search(str(v)) for k, v in turn[written:]):
         return True, "Steps table shown in chat"
     return False, "no chat message with the Steps table after the test case file was written"
+
+
+def check_rerun(turn) -> tuple[bool, str]:
+    runs = [i for i, (k, c) in enumerate(turn) if k == "tool" and c["toolId"] == "run_in_terminal" and
+            "npx playwright test" in (s := json.dumps(c, ensure_ascii=False)) and "--project=setup" not in s]
+    if not runs:
+        return False, "the test was never run in this turn"
+    for k, v in turn[runs[-1]:]:
+        for cmd in RERUN.findall(str(v)) if k == "text" else []:
+            if not re.search(r"--retries|--reporter", cmd):
+                return True, f"rerun command shown: {cmd}"
+    return False, "no code block holding only the npx playwright test command after the last run"
 
 
 def main() -> int:
@@ -136,10 +153,10 @@ def main() -> int:
         return 2
     print(f"{prompt.strip()}  ({session.name})")
     ok = True
-    for name, check in (("tasks", check_tasks), ("steps", check_steps)):
+    for name, check in (("progress", check_progress), ("steps", check_steps), ("rerun", check_rerun)):
         passed, why = check(turn)
         ok &= passed
-        print(f"{'PASS' if passed else 'FAIL'} {name:<6} {why}")
+        print(f"{'PASS' if passed else 'FAIL'} {name:<8} {why}")
     return 0 if ok else 1
 
 

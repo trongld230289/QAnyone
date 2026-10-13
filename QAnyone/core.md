@@ -40,7 +40,6 @@ Instruction files use abstract verbs. Translate with this table.
 | READ / WRITE / EDIT | `read_file` / `create_file` / `replace_string_in_file` | `Read` / `Write` / `Edit` |
 | SEARCH | `file_search`, `grep_search` | `Glob`, `Grep` |
 | BROWSER | `mcp_playwright_browser_*` | `mcp__playwright__browser_*` |
-| TASKS | `manage_todo_list` | `TodoWrite` |
 | Instruction file | `.github/copilot-instructions.md` | `CLAUDE.md` |
 | MCP config | `.vscode/mcp.json` | `.mcp.json` |
 
